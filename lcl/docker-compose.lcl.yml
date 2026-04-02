@@ -1,0 +1,21 @@
+name: pm-budgetscanner-lcl
+
+services:
+  pm-budgetscanner-lcl:
+    image: plusmin/pm-budgetscanner:${PM_LCL_VERSION}
+    container_name: pm-budgetscanner-lcl
+    environment:
+      - TZ=Europe/Amsterdam
+      - VITE_ASGARDEO_CLIENT_ID=ahVUPaBf3D1mE5xrZIM2aAmIRVYa
+      - VITE_ASGARDEO_BASE_URL=https://api.eu.asgardeo.io/t/plusmin
+      - VITE_ASGARDEO_SIGNIN_REDIRECT_URL=http://localhost:3050
+      - VITE_ASGARDEO_SIGNOUT_REDIRECT_URL=http://localhost:3050/login
+    ports:
+      - "3035:3035"
+    networks:
+      - npm_default
+    restart: always
+
+networks:
+  npm_default:
+    external: true
