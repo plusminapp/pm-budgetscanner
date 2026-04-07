@@ -19,58 +19,7 @@ import { CategoryBreakdown } from './components/CategoryBreakdown'
 import { OpslaanButtons } from './components/ExportButtons'
 import { PotjesBeheerDialog } from './components/PotjesBeheerDialog'
 import { buildOverzichtJson, importRules } from './export/exportRules'
-import type { BankFormat, ParsedTransaction, CategorizedTransaction, BudgetScannerState } from './types'
-
-const BUDGETSCANNER_SESSION_KEY = 'budgetscanner-session-v1'
-const BUDGETSCANNER_CLEAR_ON_NEXT_LOAD_KEY = 'budgetscanner-clear-on-next-load-v1'
-
-type BudgetScannerSession = {
-  state: BudgetScannerState
-  selectedYear: number | null
-  lastSavedJsonSnapshot: string | null
-}
-
-function isLegeBudgetScannerSessie(session: BudgetScannerSession): boolean {
-  return (
-    session.state.stap === 'WELKOM'
-    && session.state.bestanden.length === 0
-    && session.state.transacties.length === 0
-    && session.state.userRules.length === 0
-    && session.state.learnedRules.length === 0
-    && session.state.potjes.length === 0
-    && session.selectedYear === null
-    && session.lastSavedJsonSnapshot === null
-  )
-}
-
-function loadBudgetScannerSession(): BudgetScannerSession | null {
-  try {
-    if (localStorage.getItem(BUDGETSCANNER_CLEAR_ON_NEXT_LOAD_KEY) === '1') {
-      localStorage.removeItem(BUDGETSCANNER_CLEAR_ON_NEXT_LOAD_KEY)
-      sessionStorage.removeItem(BUDGETSCANNER_SESSION_KEY)
-      return null
-    }
-
-    const raw = sessionStorage.getItem(BUDGETSCANNER_SESSION_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as Partial<BudgetScannerSession>
-    if (!parsed || typeof parsed !== 'object' || !parsed.state) return null
-    const restored: BudgetScannerSession = {
-      state: parsed.state,
-      selectedYear: typeof parsed.selectedYear === 'number' ? parsed.selectedYear : null,
-      lastSavedJsonSnapshot: typeof parsed.lastSavedJsonSnapshot === 'string' ? parsed.lastSavedJsonSnapshot : null,
-    }
-
-    if (isLegeBudgetScannerSessie(restored)) {
-      sessionStorage.removeItem(BUDGETSCANNER_SESSION_KEY)
-      return null
-    }
-
-    return restored
-  } catch {
-    return null
-  }
-}
+import type { BankFormat, ParsedTransaction, CategorizedTransaction } from './types'
 
 function readFileAsText(file: File): Promise<string> {
   const lowerName = file.name.toLowerCase()
@@ -105,15 +54,12 @@ function detectDominantYear(txs: CategorizedTransaction[]): number {
 }
 
 export default function BudgetScanner() {
-  const restoredSession = useMemo(() => loadBudgetScannerSession(), [])
-  const [state, dispatch] = useReducer(budgetScannerReducer, restoredSession?.state ?? initialState)
+  const [state, dispatch] = useReducer(budgetScannerReducer, initialState)
   const [isLoading, setIsLoading] = useState(false)
   const [potjesOpen, setPotjesOpen] = useState(false)
-  const [selectedYear, setSelectedYear] = useState<number | null>(restoredSession?.selectedYear ?? null)
+  const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [regelsImportStatus, setRegelsImportStatus] = useState<{ bericht: string; fout: boolean } | null>(null)
-  const [lastSavedJsonSnapshot, setLastSavedJsonSnapshot] = useState<string | null>(
-    restoredSession?.lastSavedJsonSnapshot ?? null,
-  )
+  const [lastSavedJsonSnapshot, setLastSavedJsonSnapshot] = useState<string | null>(null)
 
   const handleUploadsWissen = useCallback(() => {
     dispatch({ type: 'RESET' })
@@ -123,8 +69,6 @@ export default function BudgetScanner() {
     setLastSavedJsonSnapshot(null)
     setIsLoading(false)
     setPotjesOpen(false)
-    sessionStorage.removeItem(BUDGETSCANNER_SESSION_KEY)
-    localStorage.removeItem(BUDGETSCANNER_CLEAR_ON_NEXT_LOAD_KEY)
   }, [])
 
   const handleFiles = useCallback(async (files: File[]) => {
@@ -252,70 +196,18 @@ export default function BudgetScanner() {
     && (lastSavedJsonSnapshot === null || currentJsonSnapshot !== lastSavedJsonSnapshot)
 
   useEffect(() => {
-    let pendingUnloadConfirm = false
-    let pageHideFired = false
-    let cancelTimer: ReturnType<typeof setTimeout> | null = null
-
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!heeftWijzigingenSindsJsonOpslaan) return
-
-      // Mark this unload attempt; if user confirms, the next load clears session storage.
-      pendingUnloadConfirm = true
-      pageHideFired = false
-      localStorage.setItem(BUDGETSCANNER_CLEAR_ON_NEXT_LOAD_KEY, '1')
 
       event.preventDefault()
       event.returnValue = ''
     }
 
-    // pagehide fires reliably when the page is actually leaving (user confirmed).
-    const handlePageHide = () => {
-      pageHideFired = true
-      if (cancelTimer) { clearTimeout(cancelTimer); cancelTimer = null }
-    }
-
-    // focus/visibilitychange can fire both on confirm AND cancel.
-    // Use a 300ms debounce: if pagehide hasn't fired yet, the user cancelled.
-    const handleMaybeCancelled = () => {
-      if (!pendingUnloadConfirm) return
-      if (cancelTimer) clearTimeout(cancelTimer)
-      cancelTimer = setTimeout(() => {
-        cancelTimer = null
-        if (!pageHideFired) {
-          // Page is still alive → user cancelled the unload dialog
-          pendingUnloadConfirm = false
-          localStorage.removeItem(BUDGETSCANNER_CLEAR_ON_NEXT_LOAD_KEY)
-        }
-      }, 300)
-    }
-
     window.addEventListener('beforeunload', handleBeforeUnload)
-    window.addEventListener('pagehide', handlePageHide)
-    window.addEventListener('focus', handleMaybeCancelled)
-    document.addEventListener('visibilitychange', handleMaybeCancelled)
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
-      window.removeEventListener('pagehide', handlePageHide)
-      window.removeEventListener('focus', handleMaybeCancelled)
-      document.removeEventListener('visibilitychange', handleMaybeCancelled)
-      if (cancelTimer) clearTimeout(cancelTimer)
     }
   }, [heeftWijzigingenSindsJsonOpslaan])
-
-  useEffect(() => {
-    const sessionState: BudgetScannerSession = {
-      state,
-      selectedYear,
-      lastSavedJsonSnapshot,
-    }
-
-    if (isLegeBudgetScannerSessie(sessionState)) {
-      sessionStorage.removeItem(BUDGETSCANNER_SESSION_KEY)
-      return
-    }
-
-    sessionStorage.setItem(BUDGETSCANNER_SESSION_KEY, JSON.stringify(sessionState))
-  }, [state, selectedYear, lastSavedJsonSnapshot])
 
   return (
     <div>
