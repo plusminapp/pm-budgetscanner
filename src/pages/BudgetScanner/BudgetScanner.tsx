@@ -1,8 +1,7 @@
 import { useReducer, useState, useCallback, useMemo, useEffect } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Button, Chip, Step, StepButton, Stepper } from '@mui/material'
+import { Alert, Button, Chip, Step, StepButton, Stepper } from '@mui/material'
 import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined'
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
-import { ChevronDown } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { budgetScannerReducer, initialState } from './budgetScannerReducer'
@@ -16,7 +15,6 @@ import { applyRecurrenceDetection } from './categorize/recurrenceDetector'
 import { markDuplicates } from './parsers/detectDuplicates'
 import { FileDropZone } from './components/FileDropZone'
 import { BucketCards } from './components/BucketCards'
-import { MonthlyChart } from './components/MonthlyChart'
 import { CategoryBreakdown } from './components/CategoryBreakdown'
 import { OpslaanButtons } from './components/ExportButtons'
 import { PotjesBeheerDialog } from './components/PotjesBeheerDialog'
@@ -573,14 +571,6 @@ export default function BudgetScanner() {
           <BucketCards transacties={jaarFiltered} />
 
           <div className="flex flex-col gap-4">
-            <Accordion disableGutters defaultExpanded={false}>
-              <AccordionSummary expandIcon={<ChevronDown className="h-4 w-4" />}>
-                <span className="text-sm font-semibold">Maandelijks overzicht</span>
-              </AccordionSummary>
-              <AccordionDetails sx={{ p: 0 }}>
-                <MonthlyChart transacties={jaarFiltered} />
-              </AccordionDetails>
-            </Accordion>
             <CategoryBreakdown
               transacties={jaarFiltered}
               potjes={state.potjes}

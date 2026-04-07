@@ -4,7 +4,7 @@
 
 [BudgetScanner](#budgetscanner) helpt je om overzicht te krijgen in je [budget](#budget). Het is ideaal als je wilt starten met budgetteren. Je kunt je [betalingen](#betaalgroep) eenvoudig downloaden bij je bank en aanbieden aan de app. Met de app zet je je bankbetalingen om in een duidelijk overzicht van [inkomsten](#inkomsten) en [uitgaven](#uitgaven). Je [koppelt](#toewijzen) elke [betaling](#betaalgroep) aan een [potje](#potje), zodat je goed ziet waar je geld naartoe gaat of vandaan komt.
 
-Bovenaan elke pagina staat een zogenaamde [Stepper](#stepper) met 4 stappen: 1 Welkom, 2 Uploaden, 3 [Toewijzen](#toewijzen) en 4 Gebruiken. De verschillende stappen worden in de rest van de handleiding uitgebreid toegelicht. Je kunt de [Stepper](#stepper) gebruiken om snel naar een andere stap te gaan door op die stap te klikken. Als je nog geen [betalingen](#betaalgroep) hebt geüpload (zie Stap 2), dan zijn de stappen 3 en 4 lichtgrijs. Zodra je stap 2 hebt afgerond, worden de laatste 2 stappen ook donkerder en kun je er wel naar toe.
+Bovenaan elke pagina staat een zogenaamde [Stepper](#stepper) met 3 stappen: 1 Welkom, 2 Uploaden en 3 [Toewijzen](#toewijzen). De verschillende stappen worden in de rest van de handleiding uitgebreid toegelicht. Je kunt de [Stepper](#stepper) gebruiken om snel naar een andere stap te gaan door op die stap te klikken. Als je nog geen [betalingen](#betaalgroep) hebt geüpload (zie Stap 2), dan is de stap 3 lichtgrijs. Zodra je stap 2 hebt afgerond, wordt de laatste stap ook donkerder en kun je er wel naar toe.
 
 ![Startscherm van [BudgetScanner](#budgetscanner) met welkomsttekst](images/h1-startscherm-welkom.png)
 
@@ -38,7 +38,7 @@ Het is daarom vaak verstandiger niet alle rekeningen te uploaden:
 
 - spaarrekeningen zijn gekoppeld aan een betaalrekening. Als je de betaalrekening hebt geüpload kun je daar precies zien hoeveel je hebt gespaard. Het voegt weinig toe om ze beide te hebben. Let op: vanuit de betaalrekening is het inleggen van spaargeld een betaling en dus negatief. Met andere woorden: hoe negatiever je spaarsaldo, hoe meer je hebt gespaard.
 - credit cards zijn ook gekoppeld aan een betaalrekening. Als je de credit card veel, en voor heel verschillende dingen gebruikt kan het goed zijn ook de credit card te uploaden. Je kunt dan elke betaling met de credit card aan een ander potje toewijzen. Gebruik je de credit card voor zelzefde soort dingen? Gebruik dan alleen de betaling van de betaalrekening naar de credit card.
-- cash betalingen kun je niet uploaden, want daar heb je geen bestand van. Je hebt het cash geld misschien wel opgenomen van de betaalrekening. Dan kun je die betaling gebruiken om het aan een potje [toe te wijzen](#toewijzen). Is de cash een inkomsten? Dan kun je dat het beste onthouden voor de stap [Gebruiken](#6-stap-4-gebruiken). Daar kun je het dan wel kwijt.
+- cash betalingen kun je niet uploaden, want daar heb je geen bestand van. Je hebt het cash geld misschien wel opgenomen van de betaalrekening. Dan kun je die betaling gebruiken om het aan een potje [toe te wijzen](#toewijzen).
 
 Welke rekeningen wel, en welke niet uploaden is best ingewikkeld. Typisch een onderwerp om met je [administratiemaatje](#administratiemaatje) te bespreken.
 
@@ -79,7 +79,7 @@ Dit is de kern van [BudgetScanner](#budgetscanner). Hier geef je aan wat elke [b
 
 Als je [betalingen](#betaalgroep) aan een [potje](#potje) [koppelt](#toewijzen), leert de app daarvan. Hij maakt dan een regel aan, zodat [betalingen](#betaalgroep) van die [tegenpartij](#tegenpartij) voortaan automatisch aan dat [potje](#potje) worden [gekoppeld](#toewijzen).
 
-![[Betalingen](#betaalgroep) [toewijzen](#toewijzen) aan [potjes](#potje)](images/h4-toewijzen.png)
+![[Betalingen](#betaalgroep) [toewijzen](#toewijzen) aan [potjes](#potje)](images/h4-toewijzen_annotated.png)
 
 Elk genummerd blok komt terug, in een eigen paragraaf, hieronder.
 
@@ -91,7 +91,7 @@ Onder de [stepper](#stepper) staan twee belangrijke knoppen: *Koppelingsregels* 
 
 In *Koppelingsregels* zie je welke herkenningsregels [BudgetScanner](#budgetscanner) heeft gemaakt om [betalingen](#betaalgroep) automatisch [toe te wijzen](#toewijzen) aan een [categorie](#categorie) en een [potje](#potje).
 
-[Koppelingsregels](#koppelingsregels) zijn vooral handig als je ook de [PlusMin app](#plusmin-app) gaat gebruiken. Als je dan nieuwe [betalingen](#betaalgroep) invoert, herkent [PlusMin](#plusmin-app) welk [potje](#potje) daarbij hoort. [BudgetScanner](#budgetscanner) maakt nu de regels vanzelf aan; daar hoef je niets voor te doen. Je kunt wel zeggen dat je wilt [toewijzen](#toewijzen) [zonder regel](#toewijzen-zonder-regel) omdat een [betaling](#betaalgroep) nooit meer voorkomt. Een regel is dan zinloos. In [Toewijzen zonder regel](#toewijzen-zonder-regel) lees je daar meer over.
+[BudgetScanner](#budgetscanner) maakt de regels vanzelf aan; daar hoef je niets voor te doen. Je kunt wel zeggen dat je wilt [toewijzen](#toewijzen) [zonder regel](#toewijzen-zonder-regel) omdat een [betaling](#betaalgroep) nooit meer voorkomt. Een regel is dan zinloos. In [Toewijzen zonder regel](#toewijzen-zonder-regel) lees je daar meer over.
 
 Elke regel bevat een patroon op de naam van [tegenpartij](#tegenpartij) (en soms ook de omschrijving). Als een nieuwe [betaling](#betaalgroep) daarbij past, krijgt die automatisch de juiste [koppeling](#toewijzen). Dat scheelt veel handmatig werk. In dit scherm kun je regels nalopen en aanpassen.
 
@@ -114,23 +114,19 @@ Tip: in de naam van het [JSON](#json-bestand)-bestand zitten de datum en tijd wa
 
 Tip 2: naast de datum en tijd kun je ook meer informatie in de naam stoppen. Bijvoorbeeld: 'leefgeld-gekoppeld'.
 
-### 4.2. Knop Gebruiken
-
-Met de knop *Gebruiken* ga je verder naar de volgende stap. Gebruik deze knop pas als je alle [betalingen](#betaalgroep) hebt [gekoppeld](#toewijzen). In hoofdstuk 6 wordt uitgelegd wat [Gebruiken](#6-stap-4-gebruiken) is.
-
-### 4.3. Zalmkleurige waarschuwing
+### 4.2. Zalmkleurige waarschuwing
 
 De zalmkleurige waarschuwing trekt je aandacht als er nog iets openstaat: [betalingen](#betaalgroep) zonder [categorie](#categorie) of [betalingen](#betaalgroep) zonder [potje](#potje). De [betalingen](#betaalgroep) zonder [categorie](#categorie) kun je bekijken in het tabblad *[Onbekend](#onbekend)*. De [betalingen](#betaalgroep) zonder [potje](#potje) hebben wel al een [categorie](#categorie), maar nog geen [potje](#potje). Die kun je bekijken in het tabblad *[Categorie zonder potje](#categorie-zonder-potje)* (zie [paragraaf 4.5](#45-filteren-sorteren-en-bewerken-h4-5)).
 
-Zie deze melding als een checklist: ga pas naar Gebruiken als er geen waarschuwingen meer zijn. Dan heb je namelijk alle [betalingen](#betaalgroep) [gekoppeld](#toewijzen).
+Zie deze melding als een checklist: je bent pas echt klaar als hier geen melding meer staat.
 
-### 4.4. Dashboard met de 5 categorieën
+### 4.3. Dashboard met de 5 categorieën
 
 In het dashboard zie je de vijf [categorieën](#categorie): *[Inkomsten](#inkomsten)*, *[Leefgeld](#leefgeld)*, *[Vaste lasten](#vaste-lasten)*, *[Sparen](#sparen)* en *[Negeren](#negeren)*. Deze [categorieën](#categorie) komen straks terug bij het [toewijzen](#toewijzen) van [betalingen](#betaalgroep) aan [potjes](#potje). Elk [potje](#potje) zit in precies 1 van die [categorieën](#categorie).
 
 Dit dashboard geeft een samenvatting. In het dashboard kun je bij elke [categorie](#categorie) de lijst met [potjes](#potje), inclusief de bedragen, openen door op *Toon potjes* te klikken. 
 
-### 4.5. Filteren, sorteren en bewerken {#45-filteren-sorteren-en-bewerken-h4-5}
+### 4.4. Filteren, sorteren en bewerken {#45-filteren-sorteren-en-bewerken-h4-5}
 
 Hiermee houd je grip op grote aantallen [betalingen](#betaalgroep). Je hoeft niet alles tegelijk te doen: zoek de [betaalgroepen](#betaalgroep) waar nog wat mee moet gebeuren. Met *Filteren* kun je precies die groepen overhouden die je wilt [toewijzen](#toewijzen).
 
@@ -182,7 +178,7 @@ In het sorteren-veld kun je een andere sortering van de [betalingen](#betaalgroe
 
 Met In/Uit kun je kiezen of je alleen [Ontvangsten](#inkomsten), alleen [Uitgaven](#uitgaven) of alles wilt zien. Handig om bijvoorbeeld [Inkomsten](#inkomsten) te zoeken die niet zijn herkend.
 
-### 4.6. De betalingen toewijzen aan een potje
+### 4.5. De betalingen toewijzen aan een potje
 
 In de [betalingen](#betaalgroep)-lijst doe je het echte werk. Hier gaan we de [betaalgroepen](#betaalgroep) [toewijzen](#toewijzen) aan een [potje](#potje). Het is erg simpel.
 
@@ -222,7 +218,7 @@ Als het niet nodig is dat er een regel wordt aangemaakt voor deze [tegenpartij](
 
 Dat geldt niet altijd. Een maandelijkse donatie aan een goed doel noemen we ook een [vaste last](#vaste-lasten). Soms kun je het ook opzeggen zonder gevolgen. Voorbeeld: een abonnement op een tijdschrift.
 
-In de [PlusMin app](#plusmin-app) geven we [vaste lasten](#vaste-lasten) daarom een prioriteit. Hoe belangrijker de [vaste last](#vaste-lasten), hoe zorgvuldiger je moet zorgen dat je hem elke keer betaalt. In het [BudgetScanner](#budgetscanner) is dat nog niet van belang: pas in stap 4, Gebruiken, gaan we de prioriteit van [potjes](#potje) bepalen.
+In de [PlusMin app](#plusmin-app) geven we [vaste lasten](#vaste-lasten) daarom een prioriteit. Hoe belangrijker de [vaste last](#vaste-lasten), hoe zorgvuldiger je moet zorgen dat je hem elke keer betaalt. In het [BudgetScanner](#budgetscanner) is dat nog niet van belang: pas als je de PlusMin methodegaat gebruiken wordt het belangrijk.
 
 #### Sparen
 
@@ -260,7 +256,7 @@ Klik daarna op *Opslaan*. De app leert van jouw keuze en kan vergelijkbare [beta
 
 In stap 3 Toewijzen geef je aan wat elke [betaling](#betaalgroep) betekent voor jouw [budget](#budget) door de [betalingen](#betaalgroep) [toe te wijzen](#toewijzen) aan een [categorie](#categorie) en een [potje](#potje). De app helpt je hierbij door [betalingen](#betaalgroep) van dezelfde [tegenpartij](#tegenpartij) automatisch in groepen te plaatsen, waarna je per groep een keuze maakt. Door deze [koppelingen](#toewijzen) te maken, leert de app van je keuzes en maakt het automatisch regels aan, zodat toekomstige [betalingen](#betaalgroep) van diezelfde [tegenpartij](#tegenpartij) direct correct worden ingedeeld.
 
-Twee belangrijke knoppen links onder de stepper zijn 'Koppelingsregels' en 'Opslaan'. Via 'Koppelingsregels' kun je zien welke regels de app heeft aangemaakt en eventueel aanpassen. 'Opslaan' geeft je de mogelijkheid om je voortgang te bewaren als een [JSON-bestand](#json-bestand) voor later gebruik of als een [PDF-rapport](#pdf-rapport) om je [budget](#budget) te delen. Als er nog [betalingen](#betaalgroep) zijn die niet aan een [potje](#potje) zijn [gekoppeld](#toewijzen), verschijnt er een zalmkleurige waarschuwing die je erop attendeert dat je dit nog moet afronden voordat je verder kunt gaan met de knop 'Gebruiken'.
+Twee belangrijke knoppen links onder de stepper zijn 'Koppelingsregels' en 'Opslaan'. Via 'Koppelingsregels' kun je zien welke regels de app heeft aangemaakt en eventueel aanpassen. 'Opslaan' geeft je de mogelijkheid om je voortgang te bewaren als een [JSON-bestand](#json-bestand) voor later gebruik of als een [PDF-rapport](#pdf-rapport) om je [budget](#budget) te delen. Als er nog [betalingen](#betaalgroep) zijn die niet aan een [potje](#potje) zijn [gekoppeld](#toewijzen), zie je dat in de zalmkleurige waarschuwing.
 
 Het dashboard toont de vijf hoofd[categorieën](#categorie): [inkomsten](#inkomsten), [leefgeld](#leefgeld), [vaste lasten](#vaste-lasten), [sparen](#sparen) en [negeren](#negeren). Je kunt filteren en sorteren op basis van deze [categorieën](#categorie) om specifiek te zoeken naar [betalingen](#betaalgroep) die nog aandacht nodig hebben, bijvoorbeeld via het tabblad '[Onbekend](#onbekend)'. Met de functie 'Zoeken en samenvoegen' kun je meerdere [betalingen](#betaalgroep) van dezelfde [tegenpartij](#tegenpartij), zoals verschillende boodschappen bij de Jumbo, in één groep samenvoegen om ze vervolgens in één keer aan het juiste [potje](#potje) [toe te wijzen](#toewijzen). Voor eenmalige [uitgaven](#uitgaven), zoals een drankje op vakantie, kun je kiezen voor '[Toewijzen zonder regel](#toewijzen-zonder-regel)', zodat deze [betaling](#betaalgroep) wel wordt geregistreerd maar geen automatische regel creëert voor de toekomst.
 
@@ -280,17 +276,13 @@ Het is verstandig om het aantal niet-[gekoppelde](#toewijzen) [betalingen](#beta
 6.  Zoek naar echt eenmalige [inkomsten](#inkomsten) of [uitgaven](#uitgaven). Deze wil je niet opnemen in je [budget](#budget) en kun je daarom [negeren](#negeren). Pas wel op: een nieuwe wasmachine gaat niet snel kapot, maar is het dit jaar misschien de droger of de koelkast? Bedenk bij een eenmalige [uitgave](#uitgaven) of er soortgelijke situaties kunnen ontstaan en reserveer daarvoor wel geld.
 7.  Als het goed is, zijn er nu veel minder [betalingen](#betaalgroep) die niet zijn [gekoppeld](#toewijzen) (zie het tabblad [Onbekend](#onbekend)) en geen [Categorie zonder potje](#categorie-zonder-potje) hebben. Alle andere [betalingen](#betaalgroep) zijn nu aan een [potje](#potje) [gekoppeld](#toewijzen). Nu is het tijd om door de lijst te lopen. Hierin zitten vaak veel eenmalige [uitgaven](#uitgaven) waarvoor geen regel nodig is. Met de optie [Toewijzen zonder regel](#toewijzen-zonder-regel) kun je deze snel selecteren en [toewijzen](#toewijzen). Je kunt eventueel alle resterende [betalingen](#betaalgroep) selecteren via de checkbox naast het menu *Bewerking*. Haal vervolgens de uitzonderingen uit de selectie en [koppel](#toewijzen) de rest [zonder regel](#toewijzen-zonder-regel).
 8.  Als alle [betalingen](#betaalgroep) [gekoppeld](#toewijzen) zijn, sla je eerst op als [JSON-bestand](#json-bestand) om je werk niet te verliezen, en daarna als [PDF-rapport](#pdf-rapport). Kijk in het [PDF-rapport](#pdf-rapport) naar uitschieters en probeer deze te verklaren. Dat je in mei (en misschien ook in december) meer [inkomsten](#inkomsten) had, is logisch. Maar hoe zit het met de uitschieter in het [leefgeld](#leefgeld) in augustus? Ga terug naar [BudgetScanner](#budgetscanner), filter op de betreffende [categorie](#categorie) en de maand, en sorteer op bedrag. Uitschieters zitten vaak in hogere bedragen. Heb je een verklaring gevonden? Beslis dan of je bepaalde [betalingen](#betaalgroep) aan een ander [potje](#potje) wilt toewijzen. Blijf zoeken tot je alles kunt verklaren.
-9.  Als alle [betalingen](#betaalgroep) [gekoppeld](#toewijzen) zijn en het [PDF-rapport](#pdf-rapport) geen geheimen meer bevat, kun je doorgaan naar de volgende stap: *Gebruiken*. Gefeliciteerd, je hebt je [budget](#budget) volledig in kaart gebracht!
+9.  Als alle [betalingen](#betaalgroep) [gekoppeld](#toewijzen) zijn en het [PDF-rapport](#pdf-rapport) geen geheimen meer bevat, ben je klaar! Gefeliciteerd, je hebt je [budget](#budget) volledig in kaart gebracht!
 
 ### Korte samenvatting {#korte-samenvatting-3}
 
 [Toewijzen](#toewijzen) in de praktijk geeft een aanpak om [betalingen](#betaalgroep) in [BudgetScanner](#budgetscanner) snel aan [potjes](#potje) [toe te wijzen](#toewijzen). Begin met [inkomsten](#inkomsten) en [vaste lasten](#vaste-lasten), omdat deze door [BudgetScanner](#budgetscanner) al zijn herkend. Zoek daarna andere [inkomsten](#inkomsten) en [vaste lasten](#vaste-lasten) via filters, [groepeer](#zoekensamenvoegen) [leefgeld](#leefgeld) bij veelbezochte winkels en [koppel](#toewijzen) [sparen](#sparen). Eenmalige bedragen kun je [negeren](#negeren), maar bedenk wel of er vergelijkbare kosten in de toekomst kunnen ontstaan. Wanneer de meeste [betalingen](#betaalgroep) [gekoppeld](#toewijzen) zijn, verwerk je de resterende eenmalige [uitgaven](#uitgaven) via '[Toewijzen zonder regel](#toewijzen-zonder-regel)'. 
 
-Sla op als [JSON-bestand](#json-bestand) om je werk niet te verliezen en als [PDF-rapport](#pdf-rapport) om uitschieters te analyseren. Zodra alle [betalingen](#betaalgroep) [gekoppeld](#toewijzen) zijn en het rapport geen onverklaarde bedragen meer bevat, kun je doorgaan naar de volgende stap: Gebruiken.
-
-## 6. Stap 4: Gebruiken {#6-stap-4-gebruiken}
-
-Wordt later ingevuld
+Sla op als [JSON-bestand](#json-bestand) om je werk niet te verliezen en als [PDF-rapport](#pdf-rapport) om uitschieters te analyseren. Zodra alle [betalingen](#betaalgroep) [gekoppeld](#toewijzen) zijn en het rapport geen onverklaarde bedragen meer bevat, ben je klaar.
 
 ## Bijlage Woordenlijst
 
@@ -351,7 +343,7 @@ Een onderverdeling binnen een [categorie](#categorie) waar je geld voor een spec
 Geld dat je bewust voor later bewaart, zowel het inleggen als het opnemen van spaargeld.
 
 #### Stepper
-De navigatiebalk bovenaan elke pagina met vier stappen: [Welkom](#2-stap-1-welkom), [Uploaden](#3-stap-2-bestanden-uploaden), [Toewijzen](#toewijzen) en [Gebruiken](#6-stap-4-gebruiken).
+De navigatiebalk bovenaan elke pagina met drie stappen: [Welkom](#2-stap-1-welkom), [Uploaden](#3-stap-2-bestanden-uploaden) en [Toewijzen](#4-stap-3-categorieën-en-potjes-toewijzen).
 
 #### Tegenpartij
 De naam van het bedrijf of de persoon waar je geld naar hebt overgemaakt of van hebt ontvangen.

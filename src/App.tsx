@@ -11,10 +11,13 @@ const MIN_SIDEBAR_WIDTH = 10 // %
 const MAX_SIDEBAR_WIDTH = 90 // %
 
 export default function App() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(true)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(50) // % of container
   const [isEffectivelySidebarCollapsed, setIsEffectivelySidebarCollapsed] = useState(false)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+  )
   const isDraggingRef = useRef(false)
   const sidebarWidthRef = useRef(50)
 
@@ -67,14 +70,29 @@ export default function App() {
     }
   }, [handleDragMove, handleDragEnd])
 
-  const effectiveIsCollapsed = isCollapsed || isEffectivelySidebarCollapsed
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)')
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches)
+    }
+
+    setIsMobile(mediaQuery.matches)
+    mediaQuery.addEventListener('change', handleChange)
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange)
+    }
+  }, [])
+
+  const desktopCollapsed = isCollapsed || isEffectivelySidebarCollapsed
+  const effectiveIsCollapsed = isMobile ? false : desktopCollapsed
 
   return (
     <div className={`app-shell ${effectiveIsCollapsed ? 'sidebar-collapsed' : 'sidebar-open'} ${isMobileSidebarOpen ? 'mobile-sidebar-open' : ''}`} style={{
-      '--sidebar-width': `${isEffectivelySidebarCollapsed ? 0 : sidebarWidth}%`
+      '--sidebar-width': `${sidebarWidth}%`
     } as React.CSSProperties & { '--sidebar-width': string }}>
       <AppSidebar isCollapsed={effectiveIsCollapsed} />
-      {!effectiveIsCollapsed && (
+      {!isMobile && !effectiveIsCollapsed && (
         <div
           className="app-divider"
           onMouseDown={handleDragStart}
@@ -87,7 +105,7 @@ export default function App() {
       )}
       <div className="app-content">
         <AppHeader
-          isCollapsed={effectiveIsCollapsed}
+          isCollapsed={desktopCollapsed}
           setIsCollapsed={setIsCollapsed}
           isMobileSidebarOpen={isMobileSidebarOpen}
           setIsMobileSidebarOpen={setIsMobileSidebarOpen}

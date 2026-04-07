@@ -17,8 +17,6 @@
     "@fontsource/roboto": "5.2.5",
     "@mui/icons-material": "6.4.8",
     "@mui/material": "6.4.8",
-    "ag-charts-community": "^11.1.1",
-    "ag-charts-react": "^11.1.1",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.562.0",

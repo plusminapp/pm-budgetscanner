@@ -1,6 +1,6 @@
 # Stap 1: Bouwen van de app - gebruik builder image
 ARG LCL_PLATFORM
-FROM --platform=$LCL_PLATFORM plusmin/pm-budgetscanner-builder:latest AS builder
+FROM --platform=linux/amd64 plusmin/pm-budgetscanner-builder:latest AS builder
 # Werkdirectory is al /app in de builder image
 ARG STAGE
 ENV STAGE=$STAGE
@@ -15,8 +15,8 @@ RUN npm run build
 # Stap 2: Nginx gebruiken om de statische bestanden te serveren
 FROM nginx:alpine
 
-ARG PORT
-ENV PORT=$PORT
+# ARG PORT
+# ENV PORT=$PORT
 ARG STAGE
 ENV STAGE=$STAGE
 
@@ -27,8 +27,8 @@ COPY /conf/nginx /etc/nginx
 RUN rm /etc/nginx/conf.d/*.default.conf
 COPY /conf/nginx/conf.d/$STAGE.default.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 3030 or 3035
-EXPOSE $PORT
+# Expose port 3036
+# EXPOSE $PORT
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

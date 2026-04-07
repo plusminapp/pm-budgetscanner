@@ -5,6 +5,4 @@ set -a
 set +a
 
 # Build de builder image voor pm-budgetscanner
-echo "Building pm-budgetscanner-builder image..."
-echo "Using LCL_PLATFORM: ${LCL_PLATFORM}"
-docker build --platform="${LCL_PLATFORM}" -f Dockerfile.builder -t plusmin/pm-budgetscanner-builder:latest .
+docker build --platform="linux/amd64" -f Dockerfile.builder -t plusmin/pm-budgetscanner-builder:latest .

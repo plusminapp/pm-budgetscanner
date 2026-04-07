@@ -30,11 +30,12 @@
 }
 
 .app-sidebar.collapsed {
-  width: 0;
-  min-width: 0;
-  max-width: 0;
-  padding: 0;
-  border-right: none;
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  padding: 8px 0;
+  align-items: center;
+  overflow: hidden;
 }
 
 .app-divider {
@@ -204,10 +205,17 @@
     display: none;
   }
 
+  .app-sidebar.collapsed .app-sidebar-help-render {
+    display: block;
+  }
+
   .app-sidebar.collapsed {
     min-width: 100%;
     max-width: 100%;
     width: 100%;
+    padding: 8px;
+    align-items: flex-start;
+    overflow-y: auto;
   }
 
   .app-shell.mobile-sidebar-open .app-sidebar {

@@ -6,12 +6,8 @@ services:
     container_name: pm-budgetscanner
     environment:
       - TZ=Europe/Amsterdam
-      - VITE_ASGARDEO_CLIENT_ID=wnvfL9kJtnIf0ziF3oK2QUkgaWIa
-      - VITE_ASGARDEO_BASE_URL=https://api.eu.asgardeo.io/t/plusmin
-      - VITE_ASGARDEO_SIGNIN_REDIRECT_URL=https://app.plusmin.org
-      - VITE_ASGARDEO_SIGNOUT_REDIRECT_URL=https://app.plusmin.org/login
     ports:
-      - "3030:3030"
+      - "3036:3036"
     networks:
       - npm_default
     restart: always
