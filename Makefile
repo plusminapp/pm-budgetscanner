@@ -5,6 +5,10 @@ include lcl/lcl.env
 include stg/stg.env
 export
 
+.PHONY: npm-audit
+npm-audit:
+	npm audit
+
 # LCL BUILD
 lcl-pm-bs-build: export VERSION=${PM_LCL_VERSION}
 lcl-pm-bs-build: export PLATFORM=linux/amd64
@@ -16,7 +20,7 @@ lcl-pm-bs-build:
 	${PWD}/build-bs-pdf.sh
 	${PWD}/build-docker.sh
 
-lcl-bs: lcl-pm-bs-build
+lcl-bs: npm-audit lcl-pm-bs-build
 
 
 # STG BUILD
@@ -32,7 +36,7 @@ stg-pm-bs-build:
 stg-copy:
 	./docker-cp.sh STG
 
-stg-bs: stg-pm-bs-build stg-copy stg-deploy
+stg-bs: npm-audit stg-pm-bs-build stg-copy stg-deploy
 
 stg-deploy:
 	cat .env stg/stg.env | ssh box 'cat > ~/io.vliet/pmb/.env'
