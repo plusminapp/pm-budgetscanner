@@ -2,7 +2,6 @@ import { useReducer, useState, useCallback, useMemo, useEffect } from 'react'
 import { Alert, Button, Chip, Step, StepButton, Stepper } from '@mui/material'
 import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined'
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
-import { Link } from 'react-router-dom'
 
 import { budgetScannerReducer, initialState } from './budgetScannerReducer'
 import { detectFormat } from './parsers/detectFormat'
@@ -53,7 +52,11 @@ function detectDominantYear(txs: CategorizedTransaction[]): number {
   return best
 }
 
-export default function BudgetScanner() {
+type BudgetScannerProps = {
+  onToggleHelp: () => void
+}
+
+export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
   const [state, dispatch] = useReducer(budgetScannerReducer, initialState)
   const [isLoading, setIsLoading] = useState(false)
   const [potjesOpen, setPotjesOpen] = useState(false)
@@ -301,10 +304,14 @@ export default function BudgetScanner() {
           <div className="rounded-md border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 space-y-2">
             <p className="font-semibold text-gray-900">Handig om te starten</p>
             <p>
-              De <Link className="text-green-700 underline hover:text-green-800" to="/help">
+              De <button
+                type="button"
+                className="text-green-700 underline hover:text-green-800"
+                onClick={onToggleHelp}
+              >
                 online handleiding
-              </Link>
-              : alle stappen met uitleg en schermafbeeldingen.
+              </button>
+              : alle stappen met uitleg en schermafbeeldingen in de linkerhelft van het scherm. Je kunt de handleiding ook tonen/verbergen met de knop linksboven dit venster
             </p>
             <p>
               <a className="text-green-700 underline hover:text-green-800" href="/docs/budgetscanner/BudgetScanner.pdf" target="_blank" rel="noreferrer">

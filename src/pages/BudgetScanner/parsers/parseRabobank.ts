@@ -4,7 +4,7 @@ import type { ParsedTransaction } from '../types'
 export function parseRabobank(content: string, fileName: string): ParsedTransaction[] {
   const { data } = Papa.parse<Record<string, string>>(content, {
     header: true,
-    delimiter: ';',
+    delimiter: ',',
     skipEmptyLines: true,
   })
 

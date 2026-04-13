@@ -5,7 +5,6 @@ import './App.css'
 import { AppSidebar } from './components/AppSidebar'
 import { AppHeader } from './components/AppHeader'
 import BudgetScanner from './pages/BudgetScanner/BudgetScanner'
-import { BudgetScannerHelp } from './pages/BudgetScanner/Help'
 
 const MIN_SIDEBAR_WIDTH = 10 // %
 const MAX_SIDEBAR_WIDTH = 90 // %
@@ -87,6 +86,14 @@ export default function App() {
   const desktopCollapsed = isCollapsed || isEffectivelySidebarCollapsed
   const effectiveIsCollapsed = isMobile ? false : desktopCollapsed
 
+  const handleHelpToggle = useCallback(() => {
+    if (isMobile) {
+      setIsMobileSidebarOpen((prev) => !prev)
+      return
+    }
+    setIsCollapsed((prev) => !prev)
+  }, [isMobile])
+
   return (
     <div className={`app-shell ${effectiveIsCollapsed ? 'sidebar-collapsed' : 'sidebar-open'} ${isMobileSidebarOpen ? 'mobile-sidebar-open' : ''}`} style={{
       '--sidebar-width': `${sidebarWidth}%`
@@ -112,8 +119,7 @@ export default function App() {
         />
         <main className="app-main">
           <Routes>
-            <Route path="/" element={<BudgetScanner />} />
-            <Route path="/help" element={<BudgetScannerHelp />} />
+            <Route path="/" element={<BudgetScanner onToggleHelp={handleHelpToggle} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

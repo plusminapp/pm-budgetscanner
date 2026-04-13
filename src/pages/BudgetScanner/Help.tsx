@@ -141,8 +141,8 @@ export function BudgetScannerHelpContent({ containerClassName = 'py-8 px-[10%]' 
             aria-controls="budgetscanner-help-toc"
             onClick={() => setIsTocOpen((open) => !open)}
           >
-            <h2 className="text-lg font-semibold text-gray-900">Inhoud</h2>
-            <span className="text-sm text-gray-600">{isTocOpen ? 'Verberg' : 'Toon'} inhoud</span>
+            <h2 className="text-lg font-semibold text-gray-900">Inhoudsopgave</h2>
+            <span className="text-sm text-gray-600">{isTocOpen ? 'Verberg' : 'Toon'} inhoudsopgave</span>
           </button>
           {isTocOpen && (
             <div id="budgetscanner-help-toc" className="border-t border-gray-200 px-4 pb-4 pt-3">
