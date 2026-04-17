@@ -18,7 +18,7 @@ export function OpslaanButtons({ transacties, jaar, userRules = [], learnedRules
   const [anchor, setAnchor] = useState<null | HTMLElement>(null)
 
   const handleJson = () => {
-    exportOverzicht(transacties, jaar, userRules, learnedRules, potjes)
+    exportOverzicht(transacties, userRules, learnedRules, potjes)
     onJsonSaved?.()
     setAnchor(null)
   }

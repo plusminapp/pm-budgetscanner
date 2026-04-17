@@ -93,6 +93,7 @@ export function BudgetScannerHelpContent({ containerClassName = 'py-8 px-[10%]' 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isTocOpen, setIsTocOpen] = useState(false)
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; alt?: string } | null>(null)
   const tocItems = extractToc(markdown)
 
   useEffect(() => {
@@ -113,6 +114,17 @@ export function BudgetScannerHelpContent({ containerClassName = 'py-8 px-[10%]' 
         setLoading(false)
       })
   }, [])
+
+  useEffect(() => {
+    if (!lightboxImage) return
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setLightboxImage(null)
+      }
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [lightboxImage])
 
   if (loading) {
     return (
@@ -179,24 +191,35 @@ export function BudgetScannerHelpContent({ containerClassName = 'py-8 px-[10%]' 
               return <p className="text-gray-700 leading-relaxed mb-4">{children}</p>
             },
             ul: ({ children }) => (
-              <ul className="list-disc list-inside mb-4 text-gray-700">{children}</ul>
+              <ul className="!list-disc !list-outside !pl-6 mb-4 text-gray-700">{children}</ul>
             ),
             ol: ({ children }) => (
-              <ol className="list-decimal list-inside mb-4 text-gray-700">{children}</ol>
+              <ol className="!list-decimal !list-outside !pl-6 mb-4 text-gray-700">{children}</ol>
             ),
             li: ({ children }) => (
-              <li className="mb-2">{children}</li>
+              <li className="!ml-0 mb-2">{children}</li>
             ),
-            img: ({ src, alt }) => (
-              <figure className="my-6">
-                <img className="max-w-full h-auto rounded" src={resolveDocAssetPath(src)} alt={alt} />
-                {alt && (
-                  <figcaption className="mt-2 text-center text-sm italic text-gray-500">
-                    {alt}
-                  </figcaption>
-                )}
-              </figure>
-            ),
+            img: ({ src, alt }) => {
+              const resolvedSrc = resolveDocAssetPath(src)
+              if (!resolvedSrc) return null
+              return (
+                <figure className="my-6">
+                  <button
+                    type="button"
+                    className="block w-full cursor-zoom-in"
+                    onClick={() => setLightboxImage({ src: resolvedSrc, alt })}
+                    aria-label={alt ? `Vergroot afbeelding: ${alt}` : 'Vergroot afbeelding'}
+                  >
+                    <img className="max-w-full h-auto rounded" src={resolvedSrc} alt={alt} />
+                  </button>
+                  {alt && (
+                    <figcaption className="mt-2 text-center text-sm italic text-gray-500">
+                      {alt}
+                    </figcaption>
+                  )}
+                </figure>
+              )
+            },
             blockquote: ({ children }) => (
               <blockquote className="border-l-4 border-success-600 pl-4 italic text-gray-600 my-4">{children}</blockquote>
             ),
@@ -205,6 +228,29 @@ export function BudgetScannerHelpContent({ containerClassName = 'py-8 px-[10%]' 
           {markdown}
         </ReactMarkdown>
       </article>
+
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 cursor-zoom-out"
+          onClick={() => setLightboxImage(null)}
+          role="button"
+          tabIndex={0}
+          aria-label="Sluit vergroting"
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              setLightboxImage(null)
+            }
+          }}
+        >
+          <img
+            className="max-h-[95vh] max-w-[95vw] rounded shadow-2xl"
+            src={lightboxImage.src}
+            alt={lightboxImage.alt}
+            onClick={() => setLightboxImage(null)}
+          />
+        </div>
+      )}
     </div>
   )
 }

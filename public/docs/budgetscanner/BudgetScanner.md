@@ -4,9 +4,13 @@
 
 [BudgetScanner](#budgetscanner) helpt je om overzicht te krijgen in je [budget](#budget). Het is ideaal als je wilt starten met budgetteren. Je kunt je [betalingen](#betaalgroep) eenvoudig downloaden bij je bank en aanbieden aan de app. Met de app zet je je bankbetalingen om in een duidelijk overzicht van [inkomsten](#inkomsten) en [uitgaven](#uitgaven). Je [koppelt](#toewijzen) elke [betaling](#betaalgroep) aan een [potje](#potje), zodat je goed ziet waar je geld naartoe gaat of vandaan komt.
 
-Bovenaan elke pagina staat een zogenaamde [Stepper](#stepper) met 3 stappen: 1 Welkom, 2 Uploaden en 3 [Toewijzen](#toewijzen). De verschillende stappen worden in de rest van de handleiding uitgebreid toegelicht. Je kunt de [Stepper](#stepper) gebruiken om snel naar een andere stap te gaan door op die stap te klikken. Als je nog geen [betalingen](#betaalgroep) hebt geüpload (zie Stap 2), dan is de stap 3 lichtgrijs. Zodra je stap 2 hebt afgerond, wordt de laatste stap ook donkerder en kun je er wel naar toe.
+![Startscherm van [BudgetScanner](#budgetscanner) met welkomsttekst](images/h1-welkom.png)
 
-![Startscherm van [BudgetScanner](#budgetscanner) met welkomsttekst](images/h1-startscherm-welkom.png)
+Als je de(ze) helptekst wil lezen moet je linksboven, naast het logo, op de knop 'Help tonen' klikken. De linkerhelft van het scherm wordt dan gebruikt voor de help tekst terwijl je rechts in de budgetscanner kunt werken. Je kunt in de help dus het deel zoeken waar je mee bezig bent en het rechts dan ook echt doen. Handig toch? En: alle afbeeldingen zijn klikbaar: als je erop klikt worden ze vergroot. Nog een keer klikken en ze zijn weer klein.
+
+![Startscherm van [BudgetScanner](#budgetscanner) met helptekst](images/h1-welkom-help.png)
+
+Bovenaan elke pagina staat een zogenaamde [Stepper](#stepper) met 3 stappen: 1 Welkom, 2 Uploaden en 3 [Toewijzen](#toewijzen). De verschillende stappen worden in de rest van de handleiding uitgebreid toegelicht. Je kunt de [Stepper](#stepper) gebruiken om snel naar een andere stap te gaan door op die stap te klikken. Als je nog geen [betalingen](#betaalgroep) hebt geüpload (zie Stap 2), dan is de stap 3 lichtgrijs. Zodra je stap 2 hebt afgerond, wordt de laatste stap ook donkerder en kun je er wel naar toe.
 
 Als je elke [betaling](#betaalgroep) hebt [gekoppeld](#toewijzen) aan een [potje](#potje), kun je de app vragen om een administratie in te richten in de [PlusMin app](#plusmin-app) zelf. Dit is niet verplicht, maar het kan wel. Anders weet je in elk geval welke [budgetten](#budget) voor jou van belang zijn. Je kunt het overzicht opslaan in een overzichtelijk rapport om het altijd na te kunnen kijken.
 
@@ -54,7 +58,7 @@ Werk je met [CSV/XML](#csvxmlcamt053), dan laad je je bankbetalingen in. Werk je
 
 In deze stap laad je je bestanden in. Dat kan op twee manieren: sleep bestanden naar de uploadzone, of klik op de zone en kies bestanden vanaf je apparaat. 
 
-![Bestanden uploaden](images/h3-uploaden.png)
+![Bestanden uploaden](images/h3-uploaden-voor.png)
 
 Hoe je begint, hangt af van of je hier voor het eerst bent of terugkomt.
 
@@ -64,7 +68,9 @@ Hoe je begint, hangt af van of je hier voor het eerst bent of terugkomt.
 
 **Nieuwe betalingen toevoegen aan een bestaand overzicht?** Dan upload je tegelijk het [JSON-bestand](#json-bestand) én de nieuwe bankbestanden met de extra [betalingen](#betaalgroep). [BudgetScanner](#budgetscanner) voegt de nieuwe [betalingen](#betaalgroep) toe aan wat er al in het [JSON-bestand](#json-bestand) zat. Zorg wel dat je geen betalimngen dubbel meeneemt.
 
-Zodra je bestanden zijn ingelezen, zie je direct terugkoppeling onder de uploadzone. Per bestand staat de bestandsnaam en het aantal ingelezen [betalingen](#betaalgroep). Zo controleer je snel of alles goed is gegaan.
+![Bestanden uploaden](images/h3-uploaden-na.png)
+
+Zodra je bestanden zijn ingelezen, zie je direct terugkoppeling onder de uploadzone. Per bestand staat de bestandsnaam en het aantal ingelezen [betalingen](#betaalgroep). Zo controleer je snel of alles goed is gegaan. Bovendien zijn de knoppen 'Toewijzen' 'Uploads wissen' actief geworden. Die kun je nu dus allebei gebruiken. Met 'Uploads wissen' haal je alles weg; je begint eigenlijk weer opnieuw. 
 
 Zie je een foutmelding? Controleer dan of het bestandstype klopt ([CSV](#csvxmlcamt053), [XML/CAMT.053](#csvxmlcamt053) of [JSON](#json-bestand)), of het bestand echt van je bank komt en niet handmatig is aangepast, en of je niet per ongeluk een leeg of beschadigd bestand hebt gekozen. Als het daarna nog niet lukt, download het bestand opnieuw bij je bank en probeer het nog een keer. Kom je er dan nog niet uit, vraag hulp aan je [administratiemaatje](#administratiemaatje).
 
@@ -73,7 +79,7 @@ Als alle bestanden goed zijn ingelezen, ga je door naar stap 3: *[Toewijzen](#to
 ### Korte samenvatting {#korte-samenvatting-1}
 Begin je voor het eerst, dan upload je bankbestanden ([CSV/XML](#csvxmlcamt053)). Kom je terug, dan upload je je opgeslagen [JSON](#json-bestand). Wil je nieuwe [betalingen](#betaalgroep) toevoegen, dan combineer je beide. Na het uploaden ga je door naar stap 3: *[Toewijzen](#toewijzen)*.
 
-## 4. Stap 3: Categorieën en potjes toewijzen
+## 4. Stap 3: Categorieën en potjes toewijzen {#4-stap-3-toewijzen}
 
 Dit is de kern van [BudgetScanner](#budgetscanner). Hier geef je aan wat elke [betaling](#betaalgroep) betekent voor jouw [budget](#budget). Je ziet alle [betalingen](#betaalgroep) in groepen, op basis van de naam van de [tegenpartij](#tegenpartij). Per groep [koppel](#toewijzen) je een [categorie](#categorie) en een [potje](#potje).
 
@@ -118,17 +124,23 @@ Tip 2: naast de datum en tijd kun je ook meer informatie in de naam stoppen. Bij
 
 De zalmkleurige waarschuwing trekt je aandacht als er nog iets openstaat: [betalingen](#betaalgroep) zonder [categorie](#categorie) of [betalingen](#betaalgroep) zonder [potje](#potje). De [betalingen](#betaalgroep) zonder [categorie](#categorie) kun je bekijken in het tabblad *[Onbekend](#onbekend)*. De [betalingen](#betaalgroep) zonder [potje](#potje) hebben wel al een [categorie](#categorie), maar nog geen [potje](#potje). Die kun je bekijken in het tabblad *[Categorie zonder potje](#categorie-zonder-potje)* (zie [paragraaf 4.5](#45-filteren-sorteren-en-bewerken-h4-5)).
 
+![De zalmkleurige waarschuwing](images/h4-zalmkeurige-waarschuwing.png)
+
 Zie deze melding als een checklist: je bent pas echt klaar als hier geen melding meer staat.
 
 ### 4.3. Dashboard met de 5 categorieën
 
 In het dashboard zie je de vijf [categorieën](#categorie): *[Inkomsten](#inkomsten)*, *[Leefgeld](#leefgeld)*, *[Vaste lasten](#vaste-lasten)*, *[Sparen](#sparen)* en *[Negeren](#negeren)*. Deze [categorieën](#categorie) komen straks terug bij het [toewijzen](#toewijzen) van [betalingen](#betaalgroep) aan [potjes](#potje). Elk [potje](#potje) zit in precies 1 van die [categorieën](#categorie).
 
+![Het dashboard met categoriën](images/h4-dashboard.png)
+
 Dit dashboard geeft een samenvatting. In het dashboard kun je bij elke [categorie](#categorie) de lijst met [potjes](#potje), inclusief de bedragen, openen door op *Toon potjes* te klikken. 
 
 ### 4.4. Filteren, sorteren en bewerken {#45-filteren-sorteren-en-bewerken-h4-5}
 
 Hiermee houd je grip op grote aantallen [betalingen](#betaalgroep). Je hoeft niet alles tegelijk te doen: zoek de [betaalgroepen](#betaalgroep) waar nog wat mee moet gebeuren. Met *Filteren* kun je precies die groepen overhouden die je wilt [toewijzen](#toewijzen).
+
+![Filteren, sorteren en bewerken](images/h4-filteren-sorteren-bewerken.png)
 
 Het lijkt nu waarschijnlijk wat overweldigend, al die mogelijkheden. Het goede nieuws is: je kunt niets kapot maken! Als je een bestand met [betalingen](#betaalgroep) van de bank hebt gedownload, kun je dat telkens opnieuw uploaden in stap 2. Als je voor het uploaden de knop 'Uploads wissen' gebruikt kun je echt opnieuw beginnen. Als je een punt hebt bereikt dat je denkt: 'dit begint ergens op te lijken', sla je het op als [JSON](#json-bestand). Hoe dat werkt, lees je in [paragraaf 4.1](#41-knoppen-koppelingsregels-en-opslaan). Ook met zo'n JSON bestand kun je telkens opnieuw beginnen. Alles wat je had gedaan toen je bestand bewaarde neem je dan ook nog mee.
 
@@ -145,6 +157,8 @@ Onder de tabbladen zit, helemaal links, het *Bewerking*-veld. Je kunt kiezen uit
 #### Zoeken/samenvoegen 
 
 Als je in het *Zoeken*-veld een deel van een naam invult, blijven in de lijst met [betalingen](#betaalgroep) alleen [betalingen](#betaalgroep) over die **beginnen** met dat zoekwoord. Dat de naam moet beginnen met de opgegeven letters is goed te verklaren. Als je zou zoeken op NS en je vindt alle namen met de letters ns in de naam, krijg je ook Vitens, Transavia en heel veel anderen.
+
+![Zoeken en samenvoegen](images/h4-toewijzen-jumbo-voor.png)
 
 Het kan natuurlijk dat je wel [betalingen](#betaalgroep) wilt overhouden die het zoekwoord midden in de naam hebben. Dan kun je gebruikmaken van een zogenaamde *[wildcard](#wildcard)*: het * (het sterretje dus). Als je het zoekwoord laat beginnen met een *, blijven er veel meer [betalingen](#betaalgroep) over in de lijst. Als je zoekwoord ergens in de naam voorkomt, staat het in de lijst.
 
@@ -174,6 +188,8 @@ Let op: niet alle [vaste lasten](#vaste-lasten) komen 12 keer voor. Voorbeeld: G
 
 In het sorteren-veld kun je een andere sortering van de [betalingen](#betaalgroep) kiezen: op Naam, [Categorie](#categorie), [Potje](#potje), Aantal [betalingen](#betaalgroep) of Bedrag. Als je nog een keer dezelfde sortering kiest, draait de sortering om.
 
+![Ontvangsten gesorteerd op bedrag](images/h4-toewijzen-ontvangsten-gesorteerd.png)
+
 #### In/Uit
 
 Met In/Uit kun je kiezen of je alleen [Ontvangsten](#inkomsten), alleen [Uitgaven](#uitgaven) of alles wilt zien. Handig om bijvoorbeeld [Inkomsten](#inkomsten) te zoeken die niet zijn herkend.
@@ -181,6 +197,8 @@ Met In/Uit kun je kiezen of je alleen [Ontvangsten](#inkomsten), alleen [Uitgave
 ### 4.5. De betalingen toewijzen aan een potje
 
 In de [betalingen](#betaalgroep)-lijst doe je het echte werk. Hier gaan we de [betaalgroepen](#betaalgroep) [toewijzen](#toewijzen) aan een [potje](#potje). Het is erg simpel.
+
+![Betalingen](images/h4-betalingen.png)
 
 Zorg eerst dat alle [betalingen](#betaalgroep) die je wilt [toewijzen](#toewijzen) in één groep zitten. Hoe je dat doet, staat in [paragraaf 4.5](#45-filteren-sorteren-en-bewerken-h4-5). Dat is vooral voor het gemak en niet echt noodzakelijk. Hoe meer [betalingen](#betaalgroep) je in 1x kunt [toewijzen](#toewijzen), hoe sneller je klaar bent.
 
@@ -343,7 +361,7 @@ Een onderverdeling binnen een [categorie](#categorie) waar je geld voor een spec
 Geld dat je bewust voor later bewaart, zowel het inleggen als het opnemen van spaargeld.
 
 #### Stepper
-De navigatiebalk bovenaan elke pagina met drie stappen: [Welkom](#2-stap-1-welkom), [Uploaden](#3-stap-2-bestanden-uploaden) en [Toewijzen](#4-stap-3-categorieën-en-potjes-toewijzen).
+De navigatiebalk bovenaan elke pagina met drie stappen: [Welkom](#2-stap-1-welkom), [Uploaden](#3-stap-2-bestanden-uploaden) en [Toewijzen](#4-stap-3-toewijzen).
 
 #### Tegenpartij
 De naam van het bedrijf of de persoon waar je geld naar hebt overgemaakt of van hebt ontvangen.

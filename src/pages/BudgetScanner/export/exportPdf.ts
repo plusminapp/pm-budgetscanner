@@ -85,6 +85,17 @@ const LOGO_RENDER_WIDTH = 20
 const LOGO_RENDER_HEIGHT = LOGO_RENDER_WIDTH / LOGO_ASPECT_RATIO
 const LOGO_RIGHT_PADDING = 4
 
+function twoDigits(value: number): string {
+  return String(value).padStart(2, '0')
+}
+
+function createPdfBestandsnaam(now = new Date()): string {
+  const yy = twoDigits(now.getFullYear() % 100)
+  const mm = twoDigits(now.getMonth() + 1)
+  const dd = twoDigits(now.getDate())
+  return `budgetscanner-rapport-${yy}${mm}${dd}.pdf`
+}
+
 function estimateBucketSectionHeight(rowCount: number): number {
   const tableRows = Math.max(rowCount, 1)
   return BUCKET_HEADER_HEIGHT + BUCKET_TABLE_OFFSET + ((tableRows + 1) * BUCKET_TABLE_ROW_HEIGHT) + 6
@@ -228,5 +239,5 @@ export async function exportPdf(
     currentY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + BUCKET_SECTION_GAP
   }
 
-  doc.save('plusmin-jaaroverzicht.pdf')
+  doc.save(createPdfBestandsnaam())
 }

@@ -73,7 +73,7 @@ describe('exportPdf', () => {
   it('downloads PDF and includes Negeren in summary bucket rows', async () => {
     await exportPdf([txBase], 2025, [], [], [])
 
-    expect(mockDoc.save).toHaveBeenCalledWith('plusmin-jaaroverzicht.pdf')
+    expect(mockDoc.save).toHaveBeenCalledWith(expect.stringMatching(/^budgetscanner-rapport-\d{6}\.pdf$/))
     expect(autoTableMock).toHaveBeenCalled()
 
     const summaryCall = autoTableMock.mock.calls[0]

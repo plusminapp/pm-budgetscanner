@@ -8,6 +8,8 @@ services:
       - TZ=Europe/Amsterdam
     ports:
       - "3036:3036"
+    volumes:
+      - ./nginx-logs:/var/log/nginx
     networks:
       - npm_default
     restart: always

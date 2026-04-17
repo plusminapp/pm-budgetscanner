@@ -26,11 +26,13 @@ export function AppHeader({ isCollapsed, setIsCollapsed, isMobileSidebarOpen, se
 
   return (
     <header className="app-header">
-      <Link to="/" className="app-header-logo-link" aria-label="Ga naar home">
-        <div className="app-header-logo">
-          <PlusMinLogo />
-        </div>
-      </Link>
+      {(!isHelpVisible || isMobile) && (
+        <Link to="/" className="app-header-logo-link" aria-label="Ga naar home">
+          <div className="app-header-logo">
+            <PlusMinLogo />
+          </div>
+        </Link>
+      )}
 
       <button
         className="app-header-toggle"

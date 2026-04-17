@@ -19,6 +19,19 @@ interface OverzichtFile extends RulesFile {
   transacties: CategorizedTransaction[]
 }
 
+function twoDigits(value: number): string {
+  return String(value).padStart(2, '0')
+}
+
+function createOverzichtBestandsnaam(now = new Date()): string {
+  const yy = twoDigits(now.getFullYear() % 100)
+  const mm = twoDigits(now.getMonth() + 1)
+  const dd = twoDigits(now.getDate())
+  const hh = twoDigits(now.getHours())
+  const min = twoDigits(now.getMinutes())
+  return `budgetscanner-${yy}${mm}${dd}-${hh}.${min}.json`
+}
+
 export function buildRulesJson(userRules: UserRule[], learnedRules: UserRule[], potjes: Potje[]): string {
   const toExported = (r: UserRule, bron: 'user' | 'learned'): ExportedRule => ({
     tegenpartijPatroon: r.tegenpartijPatroon,
@@ -68,7 +81,6 @@ export function buildOverzichtJson(
 
 export function exportOverzicht(
   transacties: CategorizedTransaction[],
-  jaar: number,
   userRules: UserRule[],
   learnedRules: UserRule[],
   potjes: Potje[],
@@ -78,7 +90,7 @@ export function exportOverzicht(
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `plusmin-jaaroverzicht-${jaar}.json`
+  a.download = createOverzichtBestandsnaam()
   a.click()
   URL.revokeObjectURL(url)
 }

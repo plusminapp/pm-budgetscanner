@@ -10,33 +10,34 @@ npm-audit:
 	npm audit
 
 # LCL BUILD
-lcl-pm-bs-build: export VERSION=${PM_LCL_VERSION}
-lcl-pm-bs-build: export PLATFORM=linux/amd64
-lcl-pm-bs-build: export PORT=3035
-lcl-pm-bs-build: export STAGE=lcl
-lcl-pm-bs-build:
+lcl-pmb-build: export VERSION=${PM_LCL_VERSION}
+lcl-pmb-build: export PLATFORM=linux/amd64
+lcl-pmb-build: export PORT=3035
+lcl-pmb-build: export STAGE=lcl
+lcl-pmb-build:
 	echo folder: ${PWD} platform: linux/amd64 version: ${VERSION}
 	cp lcl/lcl.env ${PWD}/lcl.env
-	${PWD}/build-bs-pdf.sh
+	${PWD}/build-pmb-pdf.sh
 	${PWD}/build-docker.sh
 
-lcl-bs: npm-audit lcl-pm-bs-build
+lcl-pmb: npm-audit lcl-pmb-build
 
 
 # STG BUILD
-stg-pm-bs-build: export VERSION=${PM_STG_VERSION}
-stg-pm-bs-build: export PLATFORM=linux/arm64
-stg-pm-bs-build: export PORT=3030
-stg-pm-bs-build: export STAGE=stg
-stg-pm-bs-build:
+stg-pmb-build: export VERSION=${PM_STG_VERSION}
+stg-pmb-build: export PLATFORM=linux/arm64
+stg-pmb-build: export PORT=3030
+stg-pmb-build: export STAGE=stg
+stg-pmb-build:
 	echo folder: ${PWD} platform: linux/arm64 version: ${VERSION}
 	cp stg/stg.env ${PWD}/stg.env
+	${PWD}/build-pmb-pdf.sh
 	${PWD}/build-docker.sh
 
 stg-copy:
 	./docker-cp.sh STG
 
-stg-bs: npm-audit stg-pm-bs-build stg-copy stg-deploy
+stg-pmb: npm-audit stg-pmb-build stg-copy stg-deploy
 
 stg-deploy:
 	cat .env stg/stg.env | ssh box 'cat > ~/io.vliet/pmb/.env'
