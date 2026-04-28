@@ -77,6 +77,7 @@ function categorize(tx: ParsedTransaction, rule: MatchableRule): CategorizedTran
     isHandmatig: false,
     isDuplicaat: false,
     regelNaam: rule.naam,
+    toewijzingsregel: rule.tegenpartijPatroon, // Set to the matched pattern
   }
 }
 
@@ -121,6 +122,7 @@ export function applyRules(
       isHandmatig: false,
       isDuplicaat: false,
       regelNaam: null,
+      toewijzingsregel: tx.tegenpartij, // For uncategorized transactions, use tegenpartij as the coupling rule
     }
   })
 }

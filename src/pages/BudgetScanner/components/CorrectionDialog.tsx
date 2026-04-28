@@ -156,7 +156,7 @@ export function CorrectionDialog({
           <TextField
             fullWidth
             color="success"
-            label="Groepsnaam"
+            label="Toewijzingsregel"
             value={bewerkteGroepNaam}
             onChange={(e) => setBewerkteGroepNaam(e.target.value)}
             onBlur={() => setBewerkteGroepNaam((current) => current.trim())}

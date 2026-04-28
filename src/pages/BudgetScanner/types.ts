@@ -25,7 +25,10 @@ export interface CategorizedTransaction extends ParsedTransaction {
   isHandmatig: boolean
   regelNaam: string | null     // which rule matched
   isDuplicaat: boolean
+  toewijzingsregel?: string     // the pattern/rule this transaction is coupled/grouped by; initially = tegenpartij; never null, always a string value
 }
+
+// IMPORTANT: tegenpartij is IMMUTABLE and must NEVER be modified after transaction creation
 
 export interface UserRule {
   tegenpartijPatroon: string

@@ -2,27 +2,56 @@ import { useReducer, useState, useCallback, useMemo, useEffect } from 'react'
 import { Alert, Button, Chip, Step, StepButton, Stepper } from '@mui/material'
 import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined'
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
+import JSZip from 'jszip'
 
 import { budgetScannerReducer, initialState } from './budgetScannerReducer'
 import { detectFormat } from './parsers/detectFormat'
-import { parseIng } from './parsers/parseIng'
-import { parseAbnAmro } from './parsers/parseAbnAmro'
-import { parseRabobank } from './parsers/parseRabobank'
 import { parseCamt053 } from './parsers/parseCamt053'
 import { applyRules } from './categorize/ruleEngine'
 import { applyRecurrenceDetection } from './categorize/recurrenceDetector'
-import { markDuplicates } from './parsers/detectDuplicates'
+import { splitDuplicates } from './parsers/detectDuplicates'
 import { FileDropZone } from './components/FileDropZone'
 import { BucketCards } from './components/BucketCards'
 import { CategoryBreakdown } from './components/CategoryBreakdown'
 import { OpslaanButtons } from './components/ExportButtons'
 import { PotjesBeheerDialog } from './components/PotjesBeheerDialog'
 import { buildOverzichtJson, importRules } from './export/exportRules'
+import { appendUploadStatus } from './uploadStatus'
 import type { BankFormat, ParsedTransaction, CategorizedTransaction } from './types'
 
-function readFileAsText(file: File): Promise<string> {
+async function readFileAsText(file: File): Promise<string> {
   const lowerName = file.name.toLowerCase()
-  const isUtf8 = lowerName.endsWith('.xml') || lowerName.endsWith('.json')
+  
+  // Handle zip files
+  if (lowerName.endsWith('.zip')) {
+    try {
+      const zip = new JSZip()
+      const content = await file.arrayBuffer()
+      const loadedZip = await zip.loadAsync(content)
+      
+      // Find XML files in the zip
+      const xmlFiles = Object.keys(loadedZip.files).filter(name => 
+        name.toLowerCase().endsWith('.xml')
+      )
+      
+      if (xmlFiles.length === 0) {
+        throw new Error('Geen XML-bestand gevonden in ZIP-bestand')
+      }
+      
+      // Use the first XML file found
+      const xmlContent = await loadedZip.file(xmlFiles[0])?.async('string')
+      if (!xmlContent) {
+        throw new Error('Kan XML-bestand niet lezen uit ZIP-bestand')
+      }
+      
+      return xmlContent
+    } catch (err) {
+      throw new Error(`ZIP-fout: ${String(err)}`)
+    }
+  }
+  
+  // Handle regular XML and JSON files
+  const isUtf8 = lowerName.endsWith('.xml') || lowerName.endsWith('.pmb')
   const encoding = isUtf8 ? 'utf-8' : 'windows-1252'
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -34,10 +63,8 @@ function readFileAsText(file: File): Promise<string> {
 
 function parseByFormat(content: string, fileName: string, format: BankFormat): ParsedTransaction[] {
   switch (format) {
-    case 'ING': return parseIng(content, fileName)
-    case 'ABN_AMRO': return parseAbnAmro(content, fileName)
-    case 'RABOBANK': return parseRabobank(content, fileName)
     case 'CAMT053': return parseCamt053(content, fileName)
+    default: throw new Error(`Onbekend formaat: ${format}`)
   }
 }
 
@@ -62,6 +89,7 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
   const [potjesOpen, setPotjesOpen] = useState(false)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [regelsImportStatus, setRegelsImportStatus] = useState<{ bericht: string; fout: boolean } | null>(null)
+  const [geweigerdeDuplicaten, setGeweigerdeDuplicaten] = useState<CategorizedTransaction[]>([])
   const [lastSavedJsonSnapshot, setLastSavedJsonSnapshot] = useState<string | null>(null)
 
   const handleUploadsWissen = useCallback(() => {
@@ -69,6 +97,7 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
     dispatch({ type: 'NAAR_UPLOAD' })
     setSelectedYear(null)
     setRegelsImportStatus(null)
+    setGeweigerdeDuplicaten([])
     setLastSavedJsonSnapshot(null)
     setIsLoading(false)
     setPotjesOpen(false)
@@ -76,8 +105,8 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
 
   const handleFiles = useCallback(async (files: File[]) => {
     setIsLoading(true)
-    const jsonFiles = files.filter((f) => f.name.toLowerCase().endsWith('.json'))
-    const bankFiles = files.filter((f) => !f.name.toLowerCase().endsWith('.json'))
+    const jsonFiles = files.filter((f) => f.name.toLowerCase().endsWith('.pmb'))
+    const bankFiles = files.filter((f) => !f.name.toLowerCase().endsWith('.pmb'))
     const uploadBerichten: string[] = []
     let heeftUploadFout = false
 
@@ -89,13 +118,11 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
         if (transacties.length > 0) {
           dispatch({ type: 'SNAPSHOT_IMPORTEREN', userRules, learnedRules, potjes, transacties })
           setSelectedYear(detectDominantYear(transacties))
+          const snapshotBericht = `${file.name}: ${transacties.length} transacties en ${userRules.length + learnedRules.length + potjes.length} regels/potjes geladen`
           uploadBerichten.push(
-            `${file.name}: ${transacties.length} transacties en ${userRules.length + learnedRules.length + potjes.length} regels/potjes geladen`,
+            snapshotBericht,
           )
-          setRegelsImportStatus({
-            bericht: `${file.name}: ${transacties.length} transacties en ${userRules.length + learnedRules.length + potjes.length} regels/potjes geladen`,
-            fout: false,
-          })
+          setRegelsImportStatus((prev) => appendUploadStatus(prev, snapshotBericht, heeftUploadFout))
           setIsLoading(false)
           return
         }
@@ -124,14 +151,13 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
           dispatch({
             type: 'BESTAND_FOUT',
             bestandNaam: file.name,
-            foutmelding: 'Onbekend formaat. Ondersteund: ING CSV, ABN AMRO CSV, Rabobank CSV, CAMT.053 XML.',
+            foutmelding: 'Onbekend formaat. Ondersteund: CAMT.053 XML of ZIP-bestand met CAMT.053 XML.',
           })
           continue
         }
         const parsed = parseByFormat(content, file.name, format)
         const categorized = applyRecurrenceDetection(applyRules(parsed, state.userRules, state.learnedRules))
         fileResults.push({ naam: file.name, txs: categorized })
-        uploadBerichten.push(`${file.name}: ${categorized.length} transacties geladen`)
       } catch (e) {
         heeftUploadFout = true
         uploadBerichten.push(`${file.name}: ${String(e)}`)
@@ -139,28 +165,27 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
       }
     }
 
-    // Mark duplicates across all files in this batch
-    const allNewTxs = fileResults.flatMap((r) => r.txs)
-    const withDuplicates = markDuplicates([...state.transacties, ...allNewTxs])
-    // Dispatch each file's transactions with updated duplicate flags
-    let offset = state.transacties.length
+    // Split duplicates and only import accepted transactions
+    const allGeweigerd: CategorizedTransaction[] = []
+    let accepted: CategorizedTransaction[] = [...state.transacties]
     for (const { naam, txs } of fileResults) {
-      const flaggedTxs = withDuplicates.slice(offset, offset + txs.length)
-      dispatch({ type: 'BESTAND_PARSED', bestandNaam: naam, transacties: flaggedTxs })
-      offset += txs.length
+      const { accepted: ok, rejected } = splitDuplicates(accepted, txs)
+      allGeweigerd.push(...rejected)
+      dispatch({ type: 'BESTAND_PARSED', bestandNaam: naam, transacties: ok })
+      const geweigerdTekst = rejected.length > 0 ? `, ${rejected.length} geweigerd als duplicaat` : ''
+      uploadBerichten.push(`${naam}: ${ok.length} transacties geladen${geweigerdTekst}`)
+      accepted = [...accepted, ...ok]
     }
+    setGeweigerdeDuplicaten(allGeweigerd)
 
     if (fileResults.length > 0) {
-      const allTxs = [...state.transacties, ...allNewTxs]
-      const year = detectDominantYear(allTxs)
+      const year = detectDominantYear(accepted)
       setSelectedYear(year)
     }
 
     if (uploadBerichten.length > 0) {
-      setRegelsImportStatus({
-        bericht: uploadBerichten.join(' | '),
-        fout: heeftUploadFout,
-      })
+      const nieuwBericht = uploadBerichten.join(' | ')
+      setRegelsImportStatus((prev) => appendUploadStatus(prev, nieuwBericht, heeftUploadFout))
     }
 
     setIsLoading(false)
@@ -320,14 +345,14 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
               : een pdf versie van de handleiding, om te bewaren of te lezen als je geen internet hebt.
             </p>
             <p>
-              <a className="text-green-700 underline hover:text-green-800" href="/docs/budgetscanner/voorbeelden/demo-johan.csv" target="_blank" rel="noreferrer">
-                voorbeelden/demo-johan.csv
+              <a className="text-green-700 underline hover:text-green-800" href="/docs/budgetscanner/voorbeelden/demo-johan.xml" target="_blank" rel="noreferrer">
+                voorbeelden/demo-johan.xml
               </a>
               : een voorbeeld van een bankbestand met alleen betalingen zonder uitgewerkte koppelingen, dus waarmee je kunt starten.
             </p>
             <p>
-              <a className="text-green-700 underline hover:text-green-800" href="/docs/budgetscanner/voorbeelden/demo-johan-ingevuld.json" target="_blank" rel="noreferrer">
-                voorbeelden/demo-johan-ingevuld.json
+              <a className="text-green-700 underline hover:text-green-800" href="/docs/budgetscanner/voorbeelden/demo-johan-ingevuld.pmb" target="_blank" rel="noreferrer">
+                voorbeelden/demo-johan-ingevuld.pmb
               </a>
               : een voorbeeld van een bewaard bestand met betalingen, koppelingen en regels, zodat je ziet wat het eindresultaat zou kunnen zijn.
             </p>
@@ -362,18 +387,51 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
             <FileDropZone onFiles={handleFiles} isLoading={isLoading} />
           </div>
           {regelsImportStatus && (
-            <p className="mt-5 text-sm">
+            <p className={`mt-5 text-sm ${regelsImportStatus.fout ? 'text-red-700' : ''}`}>
               {regelsImportStatus.bericht}
             </p>
           )}
+          {geweigerdeDuplicaten.length > 0 && (
+            <details className="mt-3 text-sm border border-amber-300 rounded bg-amber-50">
+              <summary className="cursor-pointer px-3 py-2 font-medium text-amber-800 select-none">
+                {geweigerdeDuplicaten.length} transactie{geweigerdeDuplicaten.length !== 1 ? 's' : ''} geweigerd als duplicaat — klik om te bekijken
+              </summary>
+              <div className="overflow-auto px-3 pb-3">
+                <table className="text-xs w-full border-collapse mt-2">
+                  <thead>
+                    <tr className="text-left text-amber-900 border-b border-amber-300">
+                      <th className="pr-3 py-1 font-semibold">Bestand</th>
+                      <th className="pr-3 py-1 font-semibold">Datum</th>
+                      <th className="pr-3 py-1 font-semibold text-right">Bedrag</th>
+                      <th className="pr-3 py-1 font-semibold">Tegenpartij</th>
+                      <th className="py-1 font-semibold">Omschrijving</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {geweigerdeDuplicaten.map((tx) => (
+                      <tr key={tx.id} className="border-b border-amber-100 last:border-0">
+                        <td className="pr-3 py-1 text-gray-500 whitespace-nowrap">{tx.bronBestand}</td>
+                        <td className="pr-3 py-1 whitespace-nowrap">{tx.datum}</td>
+                        <td className={`pr-3 py-1 text-right whitespace-nowrap tabular-nums ${tx.bedrag < 0 ? 'text-red-700' : 'text-green-700'}`}>
+                          {tx.bedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td className="pr-3 py-1">{tx.tegenpartij}</td>
+                        <td className="py-1 text-gray-600">{tx.omschrijving}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          )}
           <p className="mt-10 mb-4">
-            Voor het eerst hier? Dan upload je één of meer bankbestanden (CSV of XML/CAMT.053). Heb je meerdere rekeningen, zoals een betaalrekening, spaarrekening en creditcard? Dan kun je die hier allemaal tegelijk aanbieden. Lees eerst even hoofdstuk 2 als je niet zeker weet welke bestanden je nu wel of niet mee wil nemen.
+            Voor het eerst hier? Dan upload je één of meer bankbestanden (XML/CAMT.053 of ZIP-bestand met CAMT.053). Heb je meerdere rekeningen, zoals een betaalrekening, spaarrekening en creditcard? Dan kun je die hier allemaal tegelijk aanbieden. Lees eerst even hoofdstuk 2 als je niet zeker weet welke bestanden je nu wel of niet mee wil nemen.
           </p>
           <p className="mb-4">
-            Terugkomen en verdergaan? Dan upload je het JSON-bestand dat je de vorige keer hebt opgeslagen. Daarin zitten al je eerder geüploade betalingen en alle koppelingen die je al had gemaakt. Je gaat gewoon verder waar je was gebleven — je hoeft dan geen losse bankbestanden meer toe te voegen.
+            Terugkomen en verdergaan? Dan upload je het PMB-bestand dat je de vorige keer hebt opgeslagen. Daarin zitten al je eerder geüploade betalingen en alle koppelingen die je al had gemaakt. Je gaat gewoon verder waar je was gebleven — je hoeft dan geen losse bankbestanden meer toe te voegen.
           </p>
           <p className="mb-4">
-            Nieuwe betalingen toevoegen aan een bestaand overzicht? Dan upload je tegelijk het JSON-bestand én de nieuwe bankbestanden met de extra betalingen. BudgetScanner voegt de nieuwe betalingen toe aan wat er al in het JSON-bestand zat. Zorg wel dat je geen periodes dubbel meeneemt.
+            Nieuwe betalingen toevoegen aan een bestaand overzicht? Dan upload je tegelijk het PMB-bestand én de nieuwe bankbestanden met de extra betalingen. BudgetScanner voegt de nieuwe betalingen toe aan wat er al in het PMB-bestand zat. Zorg wel dat je geen periodes dubbel meeneemt.
           </p>
           <p className="mb-8">
             Zodra je bestanden zijn ingelezen, zie je direct terugkoppeling onder de uploadzone. Per bestand staat de bestandsnaam en het aantal ingelezen betalingen. Zo check je snel of alles goed is gegaan.
@@ -414,7 +472,7 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
               startIcon={<LinkOutlinedIcon fontSize="small" />}
               onClick={() => setPotjesOpen(true)}
             >
-              Koppelingregels
+              Toewijzingsregels
             </Button>
 
             <OpslaanButtons
@@ -467,14 +525,35 @@ export default function BudgetScanner({ onToggleHelp }: BudgetScannerProps) {
             </Alert>
           )}
 
+          {jaarFiltered.length > 0 && (() => {
+            const total = jaarFiltered.length
+            const rood = onbekendCount
+            const oranje = categorieZonderPotjeCount
+            const groen = total - rood - oranje
+            const pct = (n: number) => `${(n / total * 100).toFixed(2)}%`
+            return (
+              <div
+                className="flex h-3 w-full overflow-hidden rounded"
+                title={`${groen} met potje · ${oranje} zonder potje · ${rood} onbekend`}
+                role="progressbar"
+                aria-label="Toewijzingsvoortgang"
+                aria-valuemin={0}
+                aria-valuemax={total}
+                aria-valuenow={groen}
+              >
+                {groen > 0 && <div style={{ width: pct(groen) }} className="bg-green-500" title={`${groen} toegewezen aan potje`} />}
+                {oranje > 0 && <div style={{ width: pct(oranje) }} className="bg-orange-400" title={`${oranje} categorie zonder potje`} />}
+                {rood > 0 && <div style={{ width: pct(rood) }} className="bg-red-500" title={`${rood} onbekend`} />}
+              </div>
+            )
+          })()}
+
           <BucketCards transacties={jaarFiltered} />
 
           <div className="flex flex-col gap-4">
             <CategoryBreakdown
               transacties={jaarFiltered}
               potjes={state.potjes}
-              userRules={state.userRules}
-              learnedRules={state.learnedRules}
               onCorrectie={(ids, bucket, potje, groepCriterium, zonderRegel) =>
                 dispatch({ type: 'CATEGORIE_WIJZIGEN', transactieIds: ids, bucket, potje, groepCriterium, zonderRegel })
               }

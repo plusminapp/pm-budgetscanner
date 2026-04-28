@@ -73,7 +73,7 @@ export function TransactionTable({
                   checked={allSelected}
                   indeterminate={partlySelected}
                   onChange={(_, checked) => onToggleSelectAll?.(selectableTxIds, checked)}
-                  inputProps={{ 'aria-label': 'Alle zichtbare transacties (de)selecteren' }}
+                  slotProps={{ input: { 'aria-label': 'Alle zichtbare transacties (de)selecteren' } }}
                 />
               </th>
             )}
@@ -97,7 +97,7 @@ export function TransactionTable({
                     disabled={Boolean(isSelectableTx && !isSelectableTx(tx))}
                     checked={Boolean(selectedIds?.has(tx.id))}
                     onChange={(_, checked) => onToggleSelect?.(tx.id, checked)}
-                    inputProps={{ 'aria-label': `Transactie op ${tx.datum} selecteren` }}
+                    slotProps={{ input: { 'aria-label': `Transactie op ${tx.datum} selecteren` } }}
                   />
                 </td>
               )}

@@ -61,6 +61,30 @@ describe('parseCamt053', () => {
     const result = parseCamt053(CAMT_XML, 'camt.xml')
     expect(result[1].tegenpartij).toBe('Werkgever BV')
   })
+  it('truncates tegenpartij at > and trims whitespace', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <Stmt>
+      <Ntry>
+        <Amt Ccy="EUR">12.34</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <BookgDt><Dt>2023-12-01</Dt></BookgDt>
+        <NtryDtls>
+          <TxDtls>
+            <RltdPties>
+              <Cdtr><Nm>  Albert Heijn 1440 >DEVENTER 10  </Nm></Cdtr>
+            </RltdPties>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>`
+
+    const result = parseCamt053(xml, 'camt.xml')
+    expect(result[0].tegenpartij).toBe('Albert Heijn 1440')
+  })
   it('extracts omschrijving from RmtInf/Ustrd', () => {
     const result = parseCamt053(CAMT_XML, 'camt.xml')
     expect(result[0].omschrijving).toBe('Betaling pas 1234')

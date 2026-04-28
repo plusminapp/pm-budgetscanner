@@ -170,4 +170,31 @@ describe('CorrectionDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /opslaan/i }))
     expect(onCorrectie).toHaveBeenCalledWith(['1'], 'NEGEREN', 'Negeren', undefined)
   })
+
+  it('does not create a new learned rule path when editing an existing group rule in popup', () => {
+    const onCorrectie = vi.fn()
+    const onToewijzingsregelWijzigen = vi.fn()
+    render(
+      <CorrectionDialog
+        open
+        transacties={[{ ...tx('1'), bucket: 'LEEFGELD', tegenpartij: 'Albert Heijn 1358' }]}
+        potjes={somePotjes}
+        groepNaam="Albert Heijn"
+        toewijzingsregel="Albert Heijn 1358"
+        heeftBestaandeRegel
+        onSluiten={vi.fn()}
+        onCorrectie={onCorrectie}
+        onPotjeToevoegen={vi.fn()}
+        onToewijzingsregelWijzigen={onToewijzingsregelWijzigen}
+      />,
+    )
+
+    fireEvent.change(screen.getByRole('textbox', { name: /toewijzingsregel/i }), {
+      target: { value: 'Albert Heijn' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /opslaan/i }))
+
+    expect(onToewijzingsregelWijzigen).toHaveBeenCalledWith('Albert Heijn', 'LEEFGELD', null)
+    expect(onCorrectie).toHaveBeenCalledWith(['1'], 'LEEFGELD', null, undefined, true)
+  })
 })

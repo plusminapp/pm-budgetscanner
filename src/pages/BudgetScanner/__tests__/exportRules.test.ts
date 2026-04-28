@@ -126,4 +126,32 @@ describe('snapshot round-trip', () => {
     expect(result.transacties).toHaveLength(1)
     expect(result.transacties[0].id).toBe('t-1')
   })
+
+  it('normalizes imported tegenpartij names from overview files', () => {
+    const json = JSON.stringify({
+      versie: 2,
+      regels: [],
+      potjes: [],
+      transacties: [
+        {
+          id: 't-1',
+          datum: '2025-01-15',
+          bedrag: -12.34,
+          omschrijving: 'Boodschappen',
+          tegenrekening: null,
+          tegenpartij: ' 7340 DATS 24 HAASRODE >LEUVEN ',
+          bronBestand: 'overzicht.pmb',
+          bankFormat: 'CAMT053',
+          bucket: 'LEEFGELD',
+          potje: 'Boodschappen',
+          isHandmatig: true,
+          regelNaam: null,
+          isDuplicaat: false,
+        },
+      ],
+    })
+
+    const result = importRules(json)
+    expect(result.transacties[0].tegenpartij).toBe('7340 DATS 24 HAASRODE')
+  })
 })

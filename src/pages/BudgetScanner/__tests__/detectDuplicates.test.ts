@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { markDuplicates } from '../parsers/detectDuplicates'
+import { markDuplicates, splitDuplicates } from '../parsers/detectDuplicates'
 import type { CategorizedTransaction } from '../types'
 
 const tx = (id: string, overrides: Partial<CategorizedTransaction> = {}): CategorizedTransaction => ({
@@ -44,5 +44,52 @@ describe('markDuplicates', () => {
   it('resets isDuplicaat to false for first occurrence even if pre-flagged', () => {
     const result = markDuplicates([tx('1', { isDuplicaat: true })])
     expect(result[0].isDuplicaat).toBe(false)
+  })
+})
+
+describe('splitDuplicates', () => {
+  it('accepts all incoming when existing is empty', () => {
+    const { accepted, rejected } = splitDuplicates([], [tx('1'), tx('2', { tegenpartij: 'Jumbo' })])
+    expect(accepted).toHaveLength(2)
+    expect(rejected).toHaveLength(0)
+  })
+
+  it('rejects incoming that matches an existing transaction', () => {
+    const existing = [tx('1')]
+    const { accepted, rejected } = splitDuplicates(existing, [tx('2')])
+    expect(accepted).toHaveLength(0)
+    expect(rejected).toHaveLength(1)
+    expect(rejected[0].id).toBe('2')
+    expect(rejected[0].isDuplicaat).toBe(true)
+  })
+
+  it('accepts incoming with different bedrag even if other fields match', () => {
+    const existing = [tx('1')]
+    const { accepted, rejected } = splitDuplicates(existing, [tx('2', { bedrag: -99 })])
+    expect(accepted).toHaveLength(1)
+    expect(rejected).toHaveLength(0)
+  })
+
+  it('marks accepted transactions as isDuplicaat: false', () => {
+    const { accepted } = splitDuplicates([], [tx('1', { isDuplicaat: true })])
+    expect(accepted[0].isDuplicaat).toBe(false)
+  })
+
+  it('deduplicates within the incoming batch itself', () => {
+    const { accepted, rejected } = splitDuplicates([], [tx('1'), tx('2')])
+    expect(accepted).toHaveLength(1)
+    expect(rejected).toHaveLength(1)
+    expect(accepted[0].id).toBe('1')
+    expect(rejected[0].id).toBe('2')
+  })
+
+  it('handles mix of new and duplicate incoming transactions', () => {
+    const existing = [tx('1')]
+    const incoming = [tx('2'), tx('3', { tegenpartij: 'Jumbo' })]
+    const { accepted, rejected } = splitDuplicates(existing, incoming)
+    expect(accepted).toHaveLength(1)
+    expect(accepted[0].id).toBe('3')
+    expect(rejected).toHaveLength(1)
+    expect(rejected[0].id).toBe('2')
   })
 })

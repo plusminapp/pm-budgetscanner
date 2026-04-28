@@ -250,6 +250,260 @@ describe('learnedRules', () => {
     expect(next.learnedRules).toHaveLength(0)
   })
 
+  it('CATEGORIE_WIJZIGEN with groepCriterium adds all matching INKOMEN transactions to updated group', () => {
+    const state = makeLearnedState({
+      transacties: [
+        makeTx({ id: 'tx-1', tegenpartij: 'Abp Pensio', bedrag: 900, bucket: 'INKOMEN', potje: 'abp', isHandmatig: true, toewijzingsregel: 'Abp Pensio' }),
+        makeTx({ id: 'tx-2', tegenpartij: 'Abp Pensio', bedrag: 910, bucket: 'INKOMEN', potje: 'abp', isHandmatig: true, toewijzingsregel: 'Abp Pensio' }),
+        makeTx({ id: 'tx-3', tegenpartij: 'Abp Pensioenfonds', bedrag: 920, bucket: 'INKOMEN', potje: 'abp', isHandmatig: false, toewijzingsregel: 'Abp Pensioenfonds' }),
+        makeTx({ id: 'tx-4', tegenpartij: 'Abp Pensioenfonds', bedrag: 930, bucket: 'INKOMEN', potje: 'abp', isHandmatig: false, toewijzingsregel: 'Abp Pensioenfonds' }),
+        makeTx({ id: 'tx-5', tegenpartij: 'Abn Amro', bedrag: 200, bucket: 'INKOMEN', potje: 'bank', isHandmatig: true, toewijzingsregel: 'Abn Amro' }),
+      ],
+    })
+
+    const next = budgetScannerReducer(state, {
+      type: 'CATEGORIE_WIJZIGEN',
+      transactieIds: ['tx-1', 'tx-2'],
+      bucket: 'INKOMEN',
+      potje: 'abp',
+      groepCriterium: 'Abp',
+    })
+
+    expect(next.transacties[0].toewijzingsregel).toBe('Abp')
+    expect(next.transacties[1].toewijzingsregel).toBe('Abp')
+    expect(next.transacties[2].toewijzingsregel).toBe('Abp')
+    expect(next.transacties[3].toewijzingsregel).toBe('Abp')
+    expect(next.transacties[4].toewijzingsregel).toBe('Abn Amro')
+  })
+
+  it('REGEL_PATROON_OVERSCHRIJVEN for learned rule re-categorizes matching transactions category-agnostic', () => {
+    const oldRegel: UserRule = { tegenpartijPatroon: 'oude inkomensregel', bucket: 'INKOMEN', potje: 'Salaris' }
+    const state = makeLearnedState({
+      learnedRules: [oldRegel],
+      transacties: [
+        makeTx({
+          id: 'tx-1',
+          tegenpartij: 'Werkgever BV',
+          bedrag: 2500,
+          bucket: 'LEEFGELD',
+          potje: 'Boodschappen',
+          isHandmatig: false,
+        }),
+        makeTx({
+          id: 'tx-2',
+          tegenpartij: 'Werkgever BV',
+          bedrag: 2500,
+          bucket: 'SPAREN',
+          potje: 'Buffer',
+          isHandmatig: true,
+        }),
+      ],
+    })
+
+    const next = budgetScannerReducer(state, {
+      type: 'REGEL_PATROON_OVERSCHRIJVEN',
+      bron: 'learned',
+      oldRegel,
+      tegenpartijPatroon: 'werkgever',
+      potje: 'Salaris',
+    })
+
+    expect(next.transacties[0].bucket).toBe('INKOMEN')
+    expect(next.transacties[0].potje).toBe('Salaris')
+    expect(next.transacties[0].isHandmatig).toBe(false)
+    expect(next.transacties[1].bucket).toBe('SPAREN')
+    expect(next.transacties[1].potje).toBe('Buffer')
+    expect(next.transacties[1].isHandmatig).toBe(true)
+  })
+
+  it('REGEL_PATROON_OVERSCHRIJVEN updates toewijzingsregel for all matching INKOMEN transactions, also when handmatig', () => {
+    const oldRegel: UserRule = { tegenpartijPatroon: 'oude inkomensregel', richting: 'credit', bucket: 'INKOMEN', potje: 'Salaris' }
+    const state = makeLearnedState({
+      learnedRules: [oldRegel],
+      transacties: [
+        makeTx({
+          id: 'tx-1',
+          tegenpartij: 'Werkgever BV',
+          bedrag: 2400,
+          bucket: 'INKOMEN',
+          potje: 'Salaris',
+          isHandmatig: true,
+          toewijzingsregel: 'werkgever bv',
+        }),
+        makeTx({
+          id: 'tx-2',
+          tegenpartij: 'Werkgever BV',
+          bedrag: 1800,
+          bucket: 'INKOMEN',
+          potje: 'Salaris',
+          isHandmatig: true,
+          toewijzingsregel: 'salaris april',
+        }),
+        makeTx({
+          id: 'tx-3',
+          tegenpartij: 'Belastingdienst',
+          bedrag: 350,
+          bucket: 'INKOMEN',
+          potje: 'Teruggave',
+          isHandmatig: true,
+          toewijzingsregel: 'belastingdienst',
+        }),
+      ],
+    })
+
+    const next = budgetScannerReducer(state, {
+      type: 'REGEL_PATROON_OVERSCHRIJVEN',
+      bron: 'learned',
+      oldRegel,
+      tegenpartijPatroon: 'werkgever',
+      potje: 'Salaris',
+    })
+
+    expect(next.transacties[0].toewijzingsregel).toBe('werkgever')
+    expect(next.transacties[1].toewijzingsregel).toBe('werkgever')
+    expect(next.transacties[2].toewijzingsregel).toBe('Belastingdienst')
+  })
+
+  it('REGEL_PATROON_OVERSCHRIJVEN removes non-matches from old group and adds all matches to updated group', () => {
+    const oldRegel: UserRule = { tegenpartijPatroon: 'oude salarisgroep', richting: 'credit', bucket: 'INKOMEN', potje: 'Salaris' }
+    const state = makeLearnedState({
+      learnedRules: [oldRegel],
+      transacties: [
+        makeTx({
+          id: 'tx-1',
+          tegenpartij: 'Werkgever BV',
+          bedrag: 2500,
+          bucket: 'INKOMEN',
+          potje: 'Salaris',
+          isHandmatig: true,
+          toewijzingsregel: 'oude salarisgroep',
+        }),
+        makeTx({
+          id: 'tx-2',
+          tegenpartij: 'ZZP Klant',
+          bedrag: 1900,
+          bucket: 'INKOMEN',
+          potje: 'Salaris',
+          isHandmatig: true,
+          toewijzingsregel: 'oude salarisgroep',
+        }),
+        makeTx({
+          id: 'tx-3',
+          tegenpartij: 'Werkgever BV',
+          bedrag: 2200,
+          bucket: 'ONBEKEND',
+          potje: null,
+          isHandmatig: false,
+          toewijzingsregel: 'werkgever bv',
+        }),
+        makeTx({
+          id: 'tx-4',
+          tegenpartij: 'Werkgever Services',
+          bedrag: 1500,
+          bucket: 'LEEFGELD',
+          potje: 'Boodschappen',
+          isHandmatig: true,
+          toewijzingsregel: 'losse groep',
+        }),
+      ],
+    })
+
+    const next = budgetScannerReducer(state, {
+      type: 'REGEL_PATROON_OVERSCHRIJVEN',
+      bron: 'learned',
+      oldRegel,
+      tegenpartijPatroon: 'werkgever*',
+      potje: 'Salaris',
+    })
+
+    expect(next.transacties[0].toewijzingsregel).toBe('werkgever*')
+    expect(next.transacties[1].toewijzingsregel).toBe('ZZP Klant')
+    expect(next.transacties[2].toewijzingsregel).toBe('werkgever*')
+    expect(next.transacties[3].toewijzingsregel).toBe('werkgever*')
+    expect(next.transacties[2].bucket).toBe('INKOMEN')
+    expect(next.transacties[2].potje).toBe('Salaris')
+  })
+
+  it('REGEL_PATROON_OVERSCHRIJVEN groups all matches even when other rules also match', () => {
+    const editedOld: UserRule = { tegenpartijPatroon: 'oude inkomsten groep', richting: 'credit', bucket: 'INKOMEN', potje: 'Salaris' }
+    const competingUserRule: UserRule = { tegenpartijPatroon: 'werkgever', richting: 'credit', bucket: 'INKOMEN', potje: 'Werk' }
+    const state = makeLearnedState({
+      userRules: [competingUserRule],
+      learnedRules: [editedOld],
+      transacties: [
+        makeTx({
+          id: 'tx-1',
+          tegenpartij: 'Werkgever BV',
+          bedrag: 2000,
+          bucket: 'INKOMEN',
+          potje: 'Werk',
+          isHandmatig: true,
+          toewijzingsregel: 'werkgever',
+        }),
+        makeTx({
+          id: 'tx-2',
+          tegenpartij: 'Werkgever Services',
+          bedrag: 1500,
+          bucket: 'INKOMEN',
+          potje: 'Werk',
+          isHandmatig: false,
+          toewijzingsregel: 'werkgever',
+        }),
+      ],
+    })
+
+    const next = budgetScannerReducer(state, {
+      type: 'REGEL_PATROON_OVERSCHRIJVEN',
+      bron: 'learned',
+      oldRegel: editedOld,
+      tegenpartijPatroon: 'werkgever*',
+      potje: 'Salaris',
+    })
+
+    expect(next.transacties[0].toewijzingsregel).toBe('werkgever*')
+    expect(next.transacties[1].toewijzingsregel).toBe('werkgever*')
+  })
+
+  it('REGEL_PATROON_OVERSCHRIJVEN for user rule re-categorizes matching transactions category-agnostic', () => {
+    const oldRegel: UserRule = { tegenpartijPatroon: 'oude leefgeldregel', bucket: 'LEEFGELD', potje: 'Boodschappen' }
+    const state = makeLearnedState({
+      userRules: [oldRegel],
+      transacties: [
+        makeTx({
+          id: 'tx-1',
+          tegenpartij: 'Albert Heijn XL',
+          bedrag: -80,
+          bucket: 'VASTE_LASTEN',
+          potje: 'Verzekering',
+          isHandmatig: false,
+        }),
+        makeTx({
+          id: 'tx-2',
+          tegenpartij: 'Albert Heijn XL',
+          bedrag: -40,
+          bucket: 'SPAREN',
+          potje: 'Buffer',
+          isHandmatig: true,
+        }),
+      ],
+    })
+
+    const next = budgetScannerReducer(state, {
+      type: 'REGEL_PATROON_OVERSCHRIJVEN',
+      bron: 'user',
+      oldRegel,
+      tegenpartijPatroon: 'albert heijn',
+      potje: 'Boodschappen',
+    })
+
+    expect(next.transacties[0].bucket).toBe('LEEFGELD')
+    expect(next.transacties[0].potje).toBe('Boodschappen')
+    expect(next.transacties[0].isHandmatig).toBe(false)
+    expect(next.transacties[1].bucket).toBe('SPAREN')
+    expect(next.transacties[1].potje).toBe('Buffer')
+    expect(next.transacties[1].isHandmatig).toBe(true)
+  })
+
   it('REGEL_TOEPASSEN lowercases tegenpartijPatroon in userRules', () => {
     const next = budgetScannerReducer(makeLearnedState(), {
       type: 'REGEL_TOEPASSEN',

@@ -282,12 +282,12 @@ export function PotjesBeheerDialog({ open, userRules = [], learnedRules = [], on
 
   return (
     <Dialog open={open} onClose={onSluiten} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ color: 'success.main' }}>Koppelingregels</DialogTitle>
+      <DialogTitle sx={{ color: 'success.main' }}>Toewijzingsregels</DialogTitle>
       <DialogContent>
         <div>
           {gesorteerdeGroepen.length === 0 && (
             <Typography variant="body2" sx={{ color: 'success.main' }}>
-              Geen koppelingregels beschikbaar.
+              Geen toewijzingsregels beschikbaar.
             </Typography>
           )}
           {overigeGroepen.map(([key, regels]) => {

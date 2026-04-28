@@ -1,11 +1,22 @@
 #!/usr/bin/env bash
 
-. ./.env
+stage=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+echo stage: $stage
+source .env
+source "${stage}/${stage}".env
 
-echo stage: STG
-echo version: $PM_STG_VERSION
+if [ "$stage" == "dev" ]; then
+  VERSION=${PM_DEV_VERSION}
+elif [ "$stage" == "stg" ]; then
+  VERSION=${PM_STG_VERSION}
+else
+  echo "Invalid environment: $stage"
+  exit 1
+fi
 
-docker save -o .images/pm-budgetscanner.${PM_STG_VERSION}.tar plusmin/pm-budgetscanner:${PM_STG_VERSION}
-scp .images/pm-budgetscanner.${PM_STG_VERSION}.tar box:~/io.vliet/pmb/.images/
-ssh box "bash -lc 'docker load -i ~/io.vliet/pmb/.images/pm-budgetscanner.${PM_STG_VERSION}.tar'"
+echo version: $VERSION
+
+docker save -o .images/pm-budgetscanner.${VERSION}.tar plusmin/pm-budgetscanner:${VERSION}
+scp .images/pm-budgetscanner.${VERSION}.tar box:~/io.vliet/pm/.images/
+ssh box "bash -lc 'docker load -i ~/io.vliet/pm/.images/pm-budgetscanner.${VERSION}.tar'"
 

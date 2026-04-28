@@ -1,7 +1,9 @@
+import { cleanTegenpartij } from './parsers/utils'
+
 const DISPLAY_PREFIX_RE = /^(?:BCK\*|CCV\*|CM\*|MOLLIE\*|PAY\.NL\*|SUMUP\*?\s+)/i
 
 export function formatTegenpartijVoorWeergave(naam: string): string {
-  const trimmed = naam.trim()
+  const trimmed = cleanTegenpartij(naam)
   const cleaned = trimmed.replace(DISPLAY_PREFIX_RE, '').trim()
   return cleaned || trimmed
 }

@@ -1,0 +1,19 @@
+name: pm-budgetscanner-dev
+
+services:
+  pm-budgetscanner:
+    image: plusmin/pm-budgetscanner:${PM_DEV_VERSION}
+    container_name: pm-budgetscanner-dev
+    environment:
+      - TZ=Europe/Amsterdam
+    ports:
+      - "3038:3036"
+    volumes:
+      - ./nginx-logs:/var/log/nginx
+    networks:
+      - npm_default
+    restart: always
+
+networks:
+  npm_default:
+    external: true

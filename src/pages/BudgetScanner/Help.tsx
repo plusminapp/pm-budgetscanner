@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeSanitize from 'rehype-sanitize'
@@ -229,9 +230,9 @@ export function BudgetScannerHelpContent({ containerClassName = 'py-8 px-[10%]' 
         </ReactMarkdown>
       </article>
 
-      {lightboxImage && (
+      {lightboxImage && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 cursor-zoom-out"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 cursor-zoom-out"
           onClick={() => setLightboxImage(null)}
           role="button"
           tabIndex={0}
@@ -249,7 +250,8 @@ export function BudgetScannerHelpContent({ containerClassName = 'py-8 px-[10%]' 
             alt={lightboxImage.alt}
             onClick={() => setLightboxImage(null)}
           />
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )

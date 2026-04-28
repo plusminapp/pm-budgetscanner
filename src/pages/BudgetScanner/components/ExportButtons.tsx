@@ -46,7 +46,7 @@ export function OpslaanButtons({ transacties, jaar, userRules = [], learnedRules
         </MenuItem>
         <MenuItem onClick={handleJson}>
           <ListItemIcon><FileSpreadsheet className="h-4 w-4" /></ListItemIcon>
-          <ListItemText>JSON opslaan</ListItemText>
+          <ListItemText>PMB opslaan</ListItemText>
         </MenuItem>
       </Menu>
     </>

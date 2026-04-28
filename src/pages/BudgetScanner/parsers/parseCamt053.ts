@@ -1,4 +1,5 @@
 import type { ParsedTransaction } from '../types'
+import { cleanTegenpartij } from './utils'
 
 function getText(el: Element, tag: string): string {
   return el.getElementsByTagName(tag)[0]?.textContent?.trim() ?? ''
@@ -26,7 +27,9 @@ export function parseCamt053(content: string, fileName: string): ParsedTransacti
     const cdtDbtTegenpartij = isDebit
       ? getText(entry.getElementsByTagName('Cdtr')[0] ?? entry, 'Nm')
       : getText(entry.getElementsByTagName('Dbtr')[0] ?? entry, 'Nm')
-    const tegenpartij = cdtDbtTegenpartij || getText(entry, 'AddtlNtryInf').replace(/\s+/g, ' ').slice(0, 30)
+    const tegenpartij = cleanTegenpartij(
+      cdtDbtTegenpartij || getText(entry, 'AddtlNtryInf').replace(/\s+/g, ' ').slice(0, 30),
+    )
 
     const ibanEl = isDebit
       ? entry.getElementsByTagName('CdtrAcct')[0]

@@ -4,9 +4,6 @@ set -a
 . ./.env
 set +a
 
-VERSION=0.1.0-STG
-STAGE=${STAGE:-stg}
-PORT=${PORT:-3036}
 LCL_PLATFORM=${LCL_PLATFORM:-linux/amd64}
 PLATFORM=${PLATFORM:-linux/arm64}
 

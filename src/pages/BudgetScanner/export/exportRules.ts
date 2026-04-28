@@ -1,4 +1,5 @@
 import type { UserRule, Potje, CategorizedTransaction } from '../types'
+import { cleanTegenpartij } from '../parsers/utils'
 
 interface ExportedRule {
   tegenpartijPatroon: string
@@ -19,6 +20,15 @@ interface OverzichtFile extends RulesFile {
   transacties: CategorizedTransaction[]
 }
 
+function normalizeImportedTransaction(tx: CategorizedTransaction): CategorizedTransaction {
+  return {
+    ...tx,
+    tegenpartij: cleanTegenpartij(tx.tegenpartij),
+    // Ensure toewijzingsregel is set; for backward compatibility with old files, default to tegenpartij
+    toewijzingsregel: tx.toewijzingsregel || cleanTegenpartij(tx.tegenpartij),
+  }
+}
+
 function twoDigits(value: number): string {
   return String(value).padStart(2, '0')
 }
@@ -29,7 +39,7 @@ function createOverzichtBestandsnaam(now = new Date()): string {
   const dd = twoDigits(now.getDate())
   const hh = twoDigits(now.getHours())
   const min = twoDigits(now.getMinutes())
-  return `budgetscanner-${yy}${mm}${dd}-${hh}.${min}.json`
+  return `budgetscanner-${yy}${mm}${dd}-${hh}.${min}.pmb`
 }
 
 export function buildRulesJson(userRules: UserRule[], learnedRules: UserRule[], potjes: Potje[]): string {
@@ -59,7 +69,7 @@ export function exportRules(userRules: UserRule[], learnedRules: UserRule[], pot
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'budgetscanner-regels.json'
+  a.download = 'budgetscanner-regels.pmb'
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -149,7 +159,7 @@ export function importRules(json: string): {
   const potjes: Potje[] = Array.isArray((file as any).potjes) ? (file as any).potjes : []
   const transacties: CategorizedTransaction[] =
     file.versie >= 2 && Array.isArray((file as OverzichtFile).transacties)
-      ? (file as OverzichtFile).transacties
+      ? (file as OverzichtFile).transacties.map(normalizeImportedTransaction)
       : []
   return { userRules, learnedRules, potjes, transacties }
 }

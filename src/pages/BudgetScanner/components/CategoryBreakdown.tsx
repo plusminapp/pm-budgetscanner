@@ -6,9 +6,8 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined'
 import { CorrectionDialog } from './CorrectionDialog'
 import { TransactionTable } from './TransactionTable'
-import { formatTegenpartijVoorWeergave, titleCaseWoorden } from '../displayTegenpartij'
-import { matchesRulePattern, matchesOmschrijvingPattern } from '../categorize/patternMatcher'
-import type { CategorizedTransaction, Bucket, Potje, UserRule } from '../types'
+import { formatTegenpartijVoorWeergave } from '../displayTegenpartij'
+import type { CategorizedTransaction, Bucket, Potje } from '../types'
 
 const BUCKET_COLORS: Record<Bucket, 'success' | 'error' | 'primary' | 'warning' | 'default'> = {
   INKOMEN: 'success',
@@ -52,103 +51,60 @@ function parseNonNegativeInt(value: string, fallback: number): number {
   return Math.max(0, parsed)
 }
 
-type GroepeerRegel = Pick<UserRule, 'tegenpartijPatroon' | 'omschrijvingPatroon' | 'richting'>
+function formatZoekbaarBedrag(bedrag: number): string[] {
+  const raw = String(bedrag)
+  const abs = String(Math.abs(bedrag))
+  const comma = raw.replace('.', ',')
+  const commaAbs = abs.replace('.', ',')
+  const eur = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(bedrag).toLowerCase()
+  return [raw, abs, comma, commaAbs, eur]
+}
+
+function txMatchesZoekFilter(tx: CategorizedTransaction, query: string): boolean {
+  const normalized = query.trim().toLowerCase()
+  if (!normalized) return true
+
+  const tegenpartij = formatTegenpartijVoorWeergave(tx.tegenpartij).toLowerCase()
+  const toewijzingsregel = (tx.toewijzingsregel ?? '').toLowerCase()
+  const potje = (tx.potje ?? '').toLowerCase()
+  const omschrijving = tx.omschrijving.toLowerCase()
+  const bedragCandidates = formatZoekbaarBedrag(tx.bedrag)
+
+  return tegenpartij.includes(normalized)
+    || toewijzingsregel.includes(normalized)
+    || potje.includes(normalized)
+    || omschrijving.includes(normalized)
+    || bedragCandidates.some((candidate) => candidate.includes(normalized))
+}
 
 function normalizePattern(pattern: string): string {
   return pattern.trim().toLowerCase()
 }
 
-function bepaalTegenpartijPatroon(
-  tx: CategorizedTransaction,
-  userRules: UserRule[],
-  learnedRules: UserRule[],
-): string | null {
-  const regelNaam = tx.regelNaam?.trim() ?? ''
-
-  if (regelNaam.startsWith('regel:')) {
-    const patroon = regelNaam.slice('regel:'.length).trim()
-    if (patroon) return normalizePattern(patroon)
-  }
-  if (regelNaam.startsWith('geleerd:')) {
-    const patroon = regelNaam.slice('geleerd:'.length).trim()
-    if (patroon) return normalizePattern(patroon)
-  }
-
-  const tegenpartij = formatTegenpartijVoorWeergave(tx.tegenpartij).toLowerCase()
-  const omschrijving = tx.omschrijving.toLowerCase()
-  const regelMatches = (rule: GroepeerRegel) => {
-    const pattern = normalizePattern(rule.tegenpartijPatroon)
-    if (!pattern) return false
-    const richtingMatch = !rule.richting
-      || (rule.richting === 'debit' && tx.bedrag < 0)
-      || (rule.richting === 'credit' && tx.bedrag > 0)
-    if (!richtingMatch) return false
-    if (matchesRulePattern(tegenpartij, pattern)) return true
-    return Boolean(rule.omschrijvingPatroon && matchesOmschrijvingPattern(omschrijving, normalizePattern(rule.omschrijvingPatroon)))
-  }
-
-  const candidates = [...userRules, ...learnedRules]
-    .filter(regelMatches)
-    .sort((a, b) => b.tegenpartijPatroon.length - a.tegenpartijPatroon.length)
-
-  return candidates[0] ? normalizePattern(candidates[0].tegenpartijPatroon) : null
+function bepaalGroepNaam(tx: CategorizedTransaction): string {
+  // Use toewijzingsregel from transaction (set during categorization or import)
+  // If not set, fallback to tegenpartij (for backward compatibility with old data)
+  return tx.toewijzingsregel ?? tx.tegenpartij
 }
 
-function bepaalGroepNaam(
-  tx: CategorizedTransaction,
-  userRules: UserRule[],
-  learnedRules: UserRule[],
-): string {
-  const patroon = bepaalTegenpartijPatroon(tx, userRules, learnedRules)
-  return patroon ?? tx.tegenpartij
-}
-
-function isPatroonGedrevenGroep(
-  tx: CategorizedTransaction,
-  userRules: UserRule[],
-  learnedRules: UserRule[],
-): boolean {
-  return Boolean(bepaalTegenpartijPatroon(tx, userRules, learnedRules))
-}
-
-function bepaalGezamenlijkNaamdeel(namen: string[]): string {
-  if (namen.length === 0) return ''
-  if (namen.length === 1) return namen[0].trim()
-
-  const lowerNamen = namen.map((n) => n.toLowerCase())
-  const kortsteNaam = [...lowerNamen].sort((a, b) => a.length - b.length)[0]
-
-  for (let lengte = kortsteNaam.length; lengte >= 2; lengte -= 1) {
-    for (let start = 0; start <= kortsteNaam.length - lengte; start += 1) {
-      const kandidaat = kortsteNaam.slice(start, start + lengte)
-      if (!/[a-z0-9]/i.test(kandidaat)) continue
-      if (!lowerNamen.every((naam) => naam.includes(kandidaat))) continue
-
-      const opgeschoond = kandidaat
-        .replace(/^[\s\-_,.;:()]+|[\s\-_,.;:()]+$/g, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-      if (opgeschoond.length >= 2) return opgeschoond
-    }
-  }
-
-  return ''
+function isPatroonGedrevenGroep(tx: CategorizedTransaction): boolean {
+  // A group is pattern-driven if its toewijzingsregel differs from tegenpartij
+  // (meaning it's grouped by a rule pattern, not the raw counterparty name)
+  return (tx.toewijzingsregel ?? tx.tegenpartij) !== tx.tegenpartij
 }
 
 function buildCounterpartyRanking(
   transacties: CategorizedTransaction[],
-  userRules: UserRule[],
-  learnedRules: UserRule[],
 ) {
   const map = new Map<string, { naam: string; totaal: number; count: number; bucket: Bucket; txs: CategorizedTransaction[]; patroonGedreven: boolean }>()
   for (const tx of transacties) {
-    const groupNaam = bepaalGroepNaam(tx, userRules, learnedRules)
+    const groupNaam = bepaalGroepNaam(tx)
     const groupKey = normalizePattern(groupNaam) || groupNaam
     const entry = map.get(groupKey) ?? { naam: groupNaam, totaal: 0, count: 0, bucket: tx.bucket, txs: [], patroonGedreven: false }
     entry.totaal += tx.bedrag
     entry.count += 1
     entry.txs.push(tx)
-    entry.patroonGedreven = entry.patroonGedreven || isPatroonGedrevenGroep(tx, userRules, learnedRules)
+    entry.patroonGedreven = entry.patroonGedreven || isPatroonGedrevenGroep(tx)
     map.set(groupKey, entry)
   }
   return [...map.values()]
@@ -162,8 +118,6 @@ function buildCounterpartyRanking(
 interface Props {
   transacties: CategorizedTransaction[]
   potjes: Potje[]
-  userRules: UserRule[]
-  learnedRules: UserRule[]
   onCorrectie: (ids: string[], bucket: Bucket, potje: string | null, groepCriterium?: string, zonderRegel?: boolean) => void
   onPotjeToevoegen: (naam: string, bucket: Exclude<Bucket, 'ONBEKEND' | 'NEGEREN'>) => void
 }
@@ -178,10 +132,9 @@ type CounterpartyGroup = {
   maandGemiddeld: number
 }
 
-type SorteerOptie = 'naam' | 'categorie' | 'potje' | 'aantal' | 'bedrag'
+type SorteerOptie = 'naam' | 'categorie' | 'potje' | 'aantal' | 'bedrag' | 'datum'
 type SorteerRichting = 'asc' | 'desc'
 type RichtingFilter = 'alles' | 'ontvangsten' | 'uitgaven'
-type Bewerking = 'samenvoegen' | 'eenmalig'
 
 const SORTEER_LABELS: Record<SorteerOptie, string> = {
   naam: 'Naam',
@@ -189,6 +142,7 @@ const SORTEER_LABELS: Record<SorteerOptie, string> = {
   potje: 'Potje',
   aantal: 'Aantal transacties',
   bedrag: 'Bedrag',
+  datum: 'Datum',
 }
 
 const BUCKET_SORT_ORDER: Record<Bucket, number> = {
@@ -208,21 +162,12 @@ const COMPACT_FIELD_SX = {
 }
 const COMPACT_MENUITEM_SX = { fontSize: '0.8rem' }
 
-type GroupMerge = {
-  id: string
-  naam: string
-  criterium: string
-  leden: string[]
-}
-
-export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules, onCorrectie, onPotjeToevoegen }: Props) {
+export function CategoryBreakdown({ transacties, potjes, onCorrectie, onPotjeToevoegen }: Props) {
   const [activeTab, setActiveTab] = useState<TabFilter>('ALLE')
-  const [bewerking, setBewerking] = useState<Bewerking>('samenvoegen')
   const [sorteerOp, setSorteerOp] = useState<SorteerOptie>('naam')
   const [sorteerRichting, setSorteerRichting] = useState<SorteerRichting>('asc')
   const [expanded, setExpanded] = useState<string | null>(null)
   const [dialogTxs, setDialogTxs] = useState<CategorizedTransaction[]>([])
-  const [dialogGroupKey, setDialogGroupKey] = useState<string | null>(null)
   const [dialogGroupNaam, setDialogGroupNaam] = useState('')
   const [dialogForceLeefgeldEenmalig, setDialogForceLeefgeldEenmalig] = useState(false)
   const [bevestigEenmaligTxs, setBevestigEenmaligTxs] = useState<CategorizedTransaction[]>([])
@@ -234,8 +179,6 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
   const [richtingFilter, setRichtingFilter] = useState<RichtingFilter>('alles')
   const [geselecteerdeGroepen, setGeselecteerdeGroepen] = useState<string[]>([])
   const [geselecteerdeTransacties, setGeselecteerdeTransacties] = useState<string[]>([])
-  const [samengevoegdeGroepen, setSamengevoegdeGroepen] = useState<GroupMerge[]>([])
-  const [groupNameOverrides, setGroupNameOverrides] = useState<Record<string, string>>({})
 
   const isAlGekoppeldVoorEenmalig = (tx: CategorizedTransaction) => tx.bucket !== 'ONBEKEND'
 
@@ -266,44 +209,11 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
       ? transactiesBinnenDatumBereik.filter((t) => t.bucket !== 'ONBEKEND' && !(t.potje ?? '').trim())
       : transactiesBinnenDatumBereik.filter((t) => t.bucket === activeTab)
 
-  const basisRanking: CounterpartyGroup[] = buildCounterpartyRanking(filtered, userRules, learnedRules).map((item) => ({
+  const basisRanking: CounterpartyGroup[] = buildCounterpartyRanking(filtered).map((item) => ({
     ...item,
     key: item.naam,
   }))
-  const basisMap = new Map(basisRanking.map((item) => [item.naam, item]))
-
-  const mergedGroups: CounterpartyGroup[] = samengevoegdeGroepen
-    .map((merge) => {
-      const leden = merge.leden
-        .map((naam) => basisMap.get(naam))
-        .filter((item): item is CounterpartyGroup => Boolean(item))
-      if (leden.length === 0) return null
-      const totaal = leden.reduce((sum, item) => sum + item.totaal, 0)
-      const count = leden.reduce((sum, item) => sum + item.count, 0)
-      const txs = leden.flatMap((item) => item.txs)
-      return {
-        key: `merge:${merge.id}`,
-        naam: merge.naam,
-        patroonGedreven: false,
-        totaal,
-        count,
-        txs,
-        maandGemiddeld: totaal / 12,
-      }
-    })
-    .filter((item): item is CounterpartyGroup => Boolean(item))
-
-  const ledenVanMerges = new Set(samengevoegdeGroepen.flatMap((merge) => merge.leden))
-  const ranking: CounterpartyGroup[] = [
-    ...basisRanking.filter((item) => !ledenVanMerges.has(item.naam)),
-    ...mergedGroups,
-  ].sort((a, b) => a.naam.localeCompare(b.naam, 'nl'))
-
-  const getGroupNaamVoorWeergave = (group: CounterpartyGroup) => {
-    const override = groupNameOverrides[group.key]
-    if (override) return override
-    return formatTegenpartijVoorWeergave(group.naam)
-  }
+  const ranking: CounterpartyGroup[] = basisRanking
 
   const minTransacties = parseNonNegativeInt(minTransactiesFilter, 0)
   const maxTransacties = maxTransactiesFilter.trim() === ''
@@ -311,7 +221,7 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
     : parseNonNegativeInt(maxTransactiesFilter, Infinity)
   const rankingFiltered = ranking.filter((group) => {
     const naamMatch = tegenpartijFilter.trim() === ''
-      || matchesRulePattern(getGroupNaamVoorWeergave(group), tegenpartijFilter)
+      || group.txs.some((tx) => txMatchesZoekFilter(tx, tegenpartijFilter))
     if (!naamMatch) return false
     if (group.count < minTransacties) return false
     if (group.count > maxTransacties) return false
@@ -353,8 +263,30 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
     return best
   }
 
+  const sortTransactionsInGroup = (txs: CategorizedTransaction[]): CategorizedTransaction[] => {
+    if (sorteerOp !== 'datum') return txs
+
+    const direction = sorteerRichting === 'asc' ? 1 : -1
+    return [...txs].sort((a, b) => {
+      const dateDiff = a.datum.localeCompare(b.datum)
+      if (dateDiff !== 0) return direction * dateDiff
+
+      const amountDiff = Math.abs(a.bedrag) - Math.abs(b.bedrag)
+      if (amountDiff !== 0) return amountDiff
+
+      return a.id.localeCompare(b.id, 'nl')
+    })
+  }
+
+  const getSortedGroupTransactions = (group: CounterpartyGroup): CategorizedTransaction[] => sortTransactionsInGroup(group.txs)
+
+  const getGroupSortDatum = (group: CounterpartyGroup): string => {
+    const firstTx = getSortedGroupTransactions(group)[0]
+    return firstTx?.datum ?? ''
+  }
+
   const getDefaultSorteerRichting = (optie: SorteerOptie): SorteerRichting => {
-    if (optie === 'aantal' || optie === 'bedrag') return 'desc'
+    if (optie === 'aantal' || optie === 'bedrag' || optie === 'datum') return 'desc'
     return 'asc'
   }
 
@@ -378,26 +310,31 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
   const rankingSorted = [...rankingFiltered].sort((a, b) => {
     const direction = sorteerRichting === 'asc' ? 1 : -1
     if (sorteerOp === 'naam') {
-      return direction * getGroupNaamVoorWeergave(a).localeCompare(getGroupNaamVoorWeergave(b), 'nl')
+      return direction * formatTegenpartijVoorWeergave(a.naam).localeCompare(formatTegenpartijVoorWeergave(b.naam), 'nl')
     }
     if (sorteerOp === 'categorie') {
       const diff = (BUCKET_SORT_ORDER[getPrimaryBucket(a)] ?? 999) - (BUCKET_SORT_ORDER[getPrimaryBucket(b)] ?? 999)
       if (diff !== 0) return direction * diff
-      return getGroupNaamVoorWeergave(a).localeCompare(getGroupNaamVoorWeergave(b), 'nl')
+      return formatTegenpartijVoorWeergave(a.naam).localeCompare(formatTegenpartijVoorWeergave(b.naam), 'nl')
     }
     if (sorteerOp === 'potje') {
       const potjeDiff = getPrimaryPotje(a).localeCompare(getPrimaryPotje(b), 'nl')
       if (potjeDiff !== 0) return direction * potjeDiff
-      return getGroupNaamVoorWeergave(a).localeCompare(getGroupNaamVoorWeergave(b), 'nl')
+      return formatTegenpartijVoorWeergave(a.naam).localeCompare(formatTegenpartijVoorWeergave(b.naam), 'nl')
     }
     if (sorteerOp === 'aantal') {
       const diff = a.count - b.count
       if (diff !== 0) return direction * diff
-      return getGroupNaamVoorWeergave(a).localeCompare(getGroupNaamVoorWeergave(b), 'nl')
+      return formatTegenpartijVoorWeergave(a.naam).localeCompare(formatTegenpartijVoorWeergave(b.naam), 'nl')
+    }
+    if (sorteerOp === 'datum') {
+      const dateDiff = getGroupSortDatum(a).localeCompare(getGroupSortDatum(b))
+      if (dateDiff !== 0) return direction * dateDiff
+      return formatTegenpartijVoorWeergave(a.naam).localeCompare(formatTegenpartijVoorWeergave(b.naam), 'nl')
     }
     const bedragDiff = Math.abs(a.totaal) - Math.abs(b.totaal)
     if (bedragDiff !== 0) return direction * bedragDiff
-    return getGroupNaamVoorWeergave(a).localeCompare(getGroupNaamVoorWeergave(b), 'nl')
+    return formatTegenpartijVoorWeergave(a.naam).localeCompare(formatTegenpartijVoorWeergave(b.naam), 'nl')
   })
 
   const zichtbareGroepen = rankingSorted.map(({ key }) => key)
@@ -426,49 +363,8 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
     setGeselecteerdeGroepen((current) => current.filter((key) => !zichtbaarSet.has(key)))
   }
 
-  const samenvoegen = () => {
-    const groepen = ranking.filter(({ key }) => geselecteerdSet.has(key))
-    if (groepen.length < 2) return
-
-    const namen = groepen.map((g) => getGroupNaamVoorWeergave(g))
-    const fallbackNaam = [...namen].sort((a, b) => a.localeCompare(b, 'nl'))[0]
-    const filterNaam = tegenpartijFilter.trim()
-    const nieuweNaam = filterNaam || titleCaseWoorden(bepaalGezamenlijkNaamdeel(namen) || fallbackNaam)
-    if (!nieuweNaam) return
-
-    const leden = groepen.flatMap((group) => {
-      if (group.key.startsWith('merge:')) {
-        const mergeId = group.key.slice('merge:'.length)
-        const merge = samengevoegdeGroepen.find((item) => item.id === mergeId)
-        return merge?.leden ?? []
-      }
-      return [group.naam]
-    })
-    const uniekeLeden = [...new Set(leden)]
-    const mergeCriterium = (bepaalGezamenlijkNaamdeel(uniekeLeden) || uniekeLeden[0] || '').trim()
-    const nieuweMerge: GroupMerge = {
-      id: crypto.randomUUID(),
-      naam: nieuweNaam,
-      criterium: mergeCriterium,
-      leden: uniekeLeden,
-    }
-    const teVerwijderenMergeIds = new Set(
-      groepen
-        .filter((group) => group.key.startsWith('merge:'))
-        .map((group) => group.key.slice('merge:'.length)),
-    )
-
-    setSamengevoegdeGroepen((current) => [
-      ...current.filter((merge) => !teVerwijderenMergeIds.has(merge.id)),
-      nieuweMerge,
-    ])
-    setGeselecteerdeGroepen([])
-    setExpanded(`merge:${nieuweMerge.id}`)
-  }
-
   const startEenmaligDialoog = (geselecteerdeTxs: CategorizedTransaction[]) => {
     setDialogTxs(geselecteerdeTxs)
-    setDialogGroupKey(null)
     setDialogGroupNaam('')
     setDialogForceLeefgeldEenmalig(true)
   }
@@ -499,17 +395,6 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
     startEenmaligDialoog(geselecteerdeTxs)
   }
 
-  const wijzigBewerking = (nieuweBewerking: Bewerking) => {
-    const volgendeBewerking = nieuweBewerking
-    setBewerking(volgendeBewerking)
-    setGeselecteerdeGroepen([])
-    setGeselecteerdeTransacties([])
-    setBevestigEenmaligTxs([])
-    if (volgendeBewerking !== 'samenvoegen') {
-      setTegenpartijFilter('')
-    }
-  }
-
   return (
     <div className="rounded-xl border bg-white shadow-sm">
       <div className="sticky top-[-26px] z-20 border-b bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/80">
@@ -532,7 +417,7 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
           </Tabs>
         </div>
         <div className="mt-3 space-y-2">
-          {/* Row 1: checkbox, bewerking, zoeken (left) | sorteren, in/uit (right) */}
+          {/* Row 1: checkbox + zoeken (left) | sorteren, in/uit (right) */}
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex w-10 shrink-0 justify-center">
@@ -543,23 +428,37 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                     checked={alleZichtbareGeselecteerd}
                     indeterminate={deelsZichtbaarGeselecteerd}
                     onChange={(_, checked) => toggleAllesZichtbaar(checked)}
-                    inputProps={{ 'aria-label': 'Alle zichtbare groepen (de)selecteren' }}
+                    slotProps={{ input: { 'aria-label': 'Alle zichtbare groepen (de)selecteren' } }}
                   />
                 ) : (
                   <span className="invisible inline-flex h-10 w-10" aria-hidden="true" />
                 )}
               </div>
               <TextField
-                select
                 size="small"
-                label="Bewerking"
-                value={bewerking}
-                onChange={(e) => wijzigBewerking(e.target.value as Bewerking)}
+                label="Zoeken"
+                placeholder="Filter"
+                value={tegenpartijFilter}
+                onChange={(e) => setTegenpartijFilter(e.target.value)}
                 sx={{ minWidth: 180, ...COMPACT_FIELD_SX }}
-              >
-                <MenuItem value="samenvoegen" sx={COMPACT_MENUITEM_SX}>Zoeken/samenvoegen</MenuItem>
-                <MenuItem value="eenmalig" sx={COMPACT_MENUITEM_SX}>Toewijzen zonder regel</MenuItem>
-              </TextField>
+                slotProps={{
+                  inputLabel: { sx: { color: 'text.disabled', fontSize: '0.8rem' } },
+                  input: {
+                    endAdornment: tegenpartijFilter ? (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          aria-label="filter wissen"
+                          onClick={() => setTegenpartijFilter('')}
+                          edge="end"
+                        >
+                          <X size={14} />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : undefined,
+                  },
+                }}
+              />
             </div>
             <div className="ml-12 hidden flex-wrap items-center gap-2 md:ml-0 md:flex md:justify-end">
               <TextField
@@ -569,14 +468,14 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                 value={sorteerOp}
                 onChange={() => {}}
                 sx={{ width: RIGHT_FIELD_WIDTH, ...COMPACT_FIELD_SX }}
-                SelectProps={{
+                slotProps={{ select: {
                   renderValue: (value) => (
                     <span className="inline-flex items-center">
                       {SORTEER_LABELS[value as SorteerOptie]}
                       {renderSorteerPijl()}
                     </span>
                   ),
-                }}
+                }}}
               >
                 <MenuItem value="naam" onClick={() => kiesSorteerOptie('naam')} sx={COMPACT_MENUITEM_SX}>
                   <span className="inline-flex items-center">
@@ -608,6 +507,12 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                     {sorteerOp === 'bedrag' ? renderSorteerPijl() : null}
                   </span>
                 </MenuItem>
+                <MenuItem value="datum" onClick={() => kiesSorteerOptie('datum')} sx={COMPACT_MENUITEM_SX}>
+                  <span className="inline-flex items-center">
+                    {SORTEER_LABELS.datum}
+                    {sorteerOp === 'datum' ? renderSorteerPijl() : null}
+                  </span>
+                </MenuItem>
               </TextField>
               <TextField
                 select
@@ -627,46 +532,19 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
             </div>
           </div>
 
-          {/* Row 2: bewerking-knop (left) | min, max transacties (right) */}
-          <div className={`${bewerking === 'eenmalig' ? 'hidden md:flex' : 'flex'} flex-col gap-2 md:flex-row md:items-center md:justify-between`}>
+          {/* Row 2: eenmalig-knop (left) | min, max transacties (right) */}
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="flex min-h-10 flex-wrap items-center gap-2">
               <span className="inline-flex w-10 shrink-0" aria-hidden="true" />
-              {bewerking === 'samenvoegen' && (
-                <TextField
-                  size="small"
-                  label="Zoeken"
-                  placeholder="Filter"
-                  value={tegenpartijFilter}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setTegenpartijFilter(value)
-                    if (value === '') {
-                      setGeselecteerdeGroepen([])
-                    }
-                  }}
-                  sx={{ minWidth: 180, ...COMPACT_FIELD_SX }}
-                  slotProps={{
-                    inputLabel: { sx: { color: 'text.disabled', fontSize: '0.8rem' } },
-                    input: {
-                      endAdornment: tegenpartijFilter ? (
-                        <InputAdornment position="end">
-                          <IconButton
-                            size="small"
-                            aria-label="filter wissen"
-                            onClick={() => {
-                              setTegenpartijFilter('')
-                              setGeselecteerdeGroepen([])
-                            }}
-                            edge="end"
-                          >
-                            <X size={14} />
-                          </IconButton>
-                        </InputAdornment>
-                      ) : undefined,
-                    },
-                  }}
-                />
-              )}
+              <Button
+                size="small"
+                variant="outlined"
+                color="success"
+                onClick={openBulkLeefgeldEenmalig}
+                disabled={geselecteerdeGroepen.length === 0}
+              >
+                Toewijzen zonder regel ({geselecteerdeGroepen.length})
+              </Button>
             </div>
             <div className="ml-12 hidden flex-wrap items-center gap-2 md:ml-0 md:flex md:justify-end">
               <TextField
@@ -691,32 +569,10 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
             </div>
           </div>
 
-          {/* Row 3: samenvoegen-knop (left) | datum-van, datum-tot (right) */}
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          {/* Row 3: spacer (left) | datum-van, datum-tot (right) */}
+          <div className="hidden md:flex md:items-center md:justify-between">
             <div className="flex min-h-10 flex-wrap items-center gap-2">
               <span className="inline-flex w-10 shrink-0" aria-hidden="true" />
-              {bewerking === 'samenvoegen' && (
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="success"
-                  onClick={samenvoegen}
-                  disabled={tegenpartijFilter.trim() === '' || geselecteerdeGroepen.length < 2}
-                >
-                  Samenvoegen ({geselecteerdeGroepen.length})
-                </Button>
-              )}
-              {bewerking === 'eenmalig' && (
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="success"
-                  onClick={openBulkLeefgeldEenmalig}
-                  disabled={geselecteerdeGroepen.length === 0}
-                >
-                  Toewijzen zonder regel ({geselecteerdeGroepen.length})
-                </Button>
-              )}
             </div>
             <div className="ml-12 hidden flex-wrap items-center gap-2 md:ml-0 md:flex md:justify-end">
               <TextField
@@ -725,7 +581,7 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                 label="Datum van"
                 value={datumVanFilter}
                 onChange={(e) => setDatumVanFilter(e.target.value)}
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
                 sx={{ width: RIGHT_FIELD_WIDTH, ...COMPACT_FIELD_SX }}
               />
               <TextField
@@ -734,7 +590,7 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                 label="Datum tot"
                 value={datumTotFilter}
                 onChange={(e) => setDatumTotFilter(e.target.value)}
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
                 sx={{ width: RIGHT_FIELD_WIDTH, ...COMPACT_FIELD_SX }}
               />
             </div>
@@ -750,14 +606,14 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                 value={sorteerOp}
                 onChange={() => {}}
                 sx={{ width: '100%', ...COMPACT_FIELD_SX }}
-                SelectProps={{
+                slotProps={{ select: {
                   renderValue: (value) => (
                     <span className="inline-flex items-center">
                       {SORTEER_LABELS[value as SorteerOptie]}
                       {renderSorteerPijl()}
                     </span>
                   ),
-                }}
+                }}}
               >
                 <MenuItem value="naam" onClick={() => kiesSorteerOptie('naam')} sx={COMPACT_MENUITEM_SX}>
                   <span className="inline-flex items-center">
@@ -787,6 +643,12 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                   <span className="inline-flex items-center">
                     {SORTEER_LABELS.bedrag}
                     {sorteerOp === 'bedrag' ? renderSorteerPijl() : null}
+                  </span>
+                </MenuItem>
+                <MenuItem value="datum" onClick={() => kiesSorteerOptie('datum')} sx={COMPACT_MENUITEM_SX}>
+                  <span className="inline-flex items-center">
+                    {SORTEER_LABELS.datum}
+                    {sorteerOp === 'datum' ? renderSorteerPijl() : null}
                   </span>
                 </MenuItem>
               </TextField>
@@ -834,7 +696,7 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                 label="Datum van"
                 value={datumVanFilter}
                 onChange={(e) => setDatumVanFilter(e.target.value)}
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
                 sx={{ width: '100%', ...COMPACT_FIELD_SX }}
               />
               <TextField
@@ -843,7 +705,7 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                 label="Datum tot"
                 value={datumTotFilter}
                 onChange={(e) => setDatumTotFilter(e.target.value)}
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
                 sx={{ width: '100%', ...COMPACT_FIELD_SX }}
               />
             </div>
@@ -857,25 +719,44 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
         )}
         {rankingSorted.map((group) => {
           const { key, patroonGedreven, totaal, count, txs, maandGemiddeld } = group
-          const weergaveNaam = getGroupNaamVoorWeergave(group)
+          const sortedTxs = getSortedGroupTransactions(group)
+          const weergaveNaam = formatTegenpartijVoorWeergave(group.naam)
+          const isExpanded = expanded === key
+
+          const openPotjesToewijzen = () => {
+            setDialogTxs(sortedTxs)
+            setDialogGroupNaam(weergaveNaam)
+            setDialogForceLeefgeldEenmalig(false)
+          }
+
           return (
             <div key={key}>
               <div
-                role="button"
-                tabIndex={0}
                 className="group flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-gray-50"
-                onClick={() => { setExpanded(expanded === key ? null : key) }}
+                onClick={openPotjesToewijzen}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    setExpanded(expanded === key ? null : key)
+                    openPotjesToewijzen()
                   }
                 }}
+                role="button"
+                tabIndex={0}
               >
-                {expanded === key
-                  ? <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" />
-                  : <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
-                }
+                <button
+                  type="button"
+                  className="rounded p-0.5 hover:bg-gray-100"
+                  aria-label={`${isExpanded ? 'Inklappen' : 'Uitklappen'} ${weergaveNaam}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setExpanded(isExpanded ? null : key)
+                  }}
+                >
+                  {isExpanded
+                    ? <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" />
+                    : <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+                  }
+                </button>
                 {toonSelectieCheckboxes && (
                   <Checkbox
                     size="small"
@@ -883,13 +764,13 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                     checked={geselecteerdSet.has(key)}
                     onClick={(e) => e.stopPropagation()}
                     onChange={() => toggleGroepSelectie(key)}
-                    inputProps={{ 'aria-label': `Groep ${weergaveNaam} selecteren` }}
+                    slotProps={{ input: { 'aria-label': `Groep ${weergaveNaam} selecteren` } }}
                   />
                 )}
                 <span className="flex-1 font-medium">
                   {weergaveNaam}
                   {patroonGedreven && (
-                    <span className="ml-2 text-xs font-normal text-gray-500">(op patroon)</span>
+                    <span className="ml-2 text-xs font-normal text-gray-500">(met toewijzingsregel)</span>
                   )}
                 </span>
                 <span className="flex flex-wrap gap-1">
@@ -918,20 +799,17 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                   aria-label={`Categorie wijzigen voor ${weergaveNaam}`}
                   onClick={(e) => {
                     e.stopPropagation()
-                    setDialogTxs(txs)
-                    setDialogGroupKey(key)
-                    setDialogGroupNaam(weergaveNaam)
-                    setDialogForceLeefgeldEenmalig(false)
+                    openPotjesToewijzen()
                   }}
                 >
                   <Pencil className="h-3.5 w-3.5 text-gray-400" />
                 </button>
               </div>
 
-              {expanded === key && (
+              {isExpanded && (
                 <div className="border-t bg-gray-50 px-4 py-3">
                   <TransactionTable
-                    transacties={txs}
+                    transacties={sortedTxs}
                     selectable={false}
                     isSelectableTx={undefined}
                     selectedIds={geselecteerdeTxSet}
@@ -939,7 +817,6 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
                     onToggleSelectAll={toggleAlleTransactiesInGroep}
                     onEdit={(tx) => {
                       setDialogTxs([tx])
-                      setDialogGroupKey(key)
                       setDialogGroupNaam(weergaveNaam)
                       setDialogForceLeefgeldEenmalig(false)
                     }}
@@ -960,42 +837,25 @@ export function CategoryBreakdown({ transacties, potjes, userRules, learnedRules
           forceLeefgeldEenmalig={dialogForceLeefgeldEenmalig}
           onSluiten={() => {
             setDialogTxs([])
-            setDialogGroupKey(null)
             setDialogGroupNaam('')
             setDialogForceLeefgeldEenmalig(false)
             setBevestigEenmaligTxs([])
           }}
           onPotjeToevoegen={onPotjeToevoegen}
           onGroepNaamWijzigen={(nieuweNaam) => {
-            if (!dialogGroupKey) return
-            if (dialogGroupKey.startsWith('merge:')) {
-              const mergeId = dialogGroupKey.slice('merge:'.length)
-              setSamengevoegdeGroepen((current) =>
-                current.map((merge) => merge.id === mergeId ? { ...merge, naam: nieuweNaam } : merge),
-              )
-            } else {
-              setGroupNameOverrides((current) => ({ ...current, [dialogGroupKey]: nieuweNaam }))
-            }
+            // dialogGroupNaam is used as fallback in onCorrectie callback
             setDialogGroupNaam(nieuweNaam)
           }}
           onCorrectie={(ids, bucket, potje, groepNaam, zonderRegel) => {
-            const geselecteerdeGroep = dialogGroupKey
-              ? ranking.find((group) => group.key === dialogGroupKey)
-              : undefined
-            const isGroepCorrectie = Boolean(
-              (dialogGroupKey && dialogGroupKey.startsWith('merge:'))
-              || (geselecteerdeGroep && geselecteerdeGroep.count > 1),
-            )
-            const groepCriterium = isGroepCorrectie
-              ? (groepNaam?.trim() || dialogGroupNaam.trim() || undefined)
-              : undefined
+            // Alleen doorgegeven groepCriterium (toewijzingsregel) als zonderRegel false is
+            // Als zonderRegel true, moet groepCriterium undefined zijn om geen regel te maken
+            const groepCriterium = !zonderRegel ? (groepNaam?.trim() || dialogGroupNaam.trim() || undefined) : undefined
             if (zonderRegel) {
               onCorrectie(ids, bucket, potje, groepCriterium, true)
             } else {
               onCorrectie(ids, bucket, potje, groepCriterium)
             }
             setDialogTxs([])
-            setDialogGroupKey(null)
             setDialogGroupNaam('')
             setDialogForceLeefgeldEenmalig(false)
             setGeselecteerdeTransacties([])

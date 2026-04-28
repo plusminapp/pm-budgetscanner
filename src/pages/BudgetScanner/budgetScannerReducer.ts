@@ -114,7 +114,39 @@ function mergeLearnedRules(existing: UserRule[], incoming: UserRule[]): UserRule
   return [...map.values()]
 }
 
-// Apply learned rules to ONBEKEND transactions only
+// Fundamental reconciliation for rule edits:
+// - non-manual transactions are re-categorized by current rules
+// - ALL transactions get a fresh toewijzingsregel derived from current rules
+function reconcileTransactionsAfterRuleEdit(
+  transacties: CategorizedTransaction[],
+  userRules: UserRule[],
+  learnedRules: UserRule[],
+): CategorizedTransaction[] {
+  return transacties.map((tx) => {
+    const { bucket: _bucket, potje: _potje, isHandmatig: _isHandmatig, regelNaam: _regelNaam, toewijzingsregel: _toewijzingsregel, isDuplicaat, ...parsed } = tx
+    const [categorized] = applyRules([parsed], userRules, learnedRules)
+    const nextToewijzingsregel = categorized.toewijzingsregel ?? parsed.tegenpartij
+
+    if (tx.isHandmatig) {
+      return { ...tx, toewijzingsregel: nextToewijzingsregel }
+    }
+
+    return { ...categorized, isDuplicaat, toewijzingsregel: nextToewijzingsregel }
+  })
+}
+
+function applyEditedRuleGrouping(
+  transacties: CategorizedTransaction[],
+  editedRule: UserRule,
+): CategorizedTransaction[] {
+  return transacties.map((tx) => {
+    const [matched] = applyRules([tx], [editedRule], [])
+    if (!matched.regelNaam) return tx
+    return { ...tx, toewijzingsregel: editedRule.tegenpartijPatroon }
+  })
+}
+
+// Existing behavior for learned auto-apply: touch ONBEKEND only
 function applyLearnedToOnbekend(
   transacties: CategorizedTransaction[],
   learnedRules: UserRule[],
@@ -170,9 +202,16 @@ export function budgetScannerReducer(
     case 'CATEGORIE_WIJZIGEN': {
       const ids = new Set(action.transactieIds)
       const normalizedPotje = normalizePotjeForBucket(action.bucket, action.potje)
+      const nieuwToewijzingsregel = action.groepCriterium?.trim()
       const updatedTxs = state.transacties.map((tx) =>
         ids.has(tx.id)
-          ? { ...tx, bucket: action.bucket, potje: normalizedPotje, isHandmatig: true }
+          ? {
+              ...tx,
+              bucket: action.bucket,
+              potje: normalizedPotje,
+              isHandmatig: true,
+              toewijzingsregel: nieuwToewijzingsregel || tx.toewijzingsregel, // Update toewijzingsregel if provided
+            }
           : tx,
       )
       if (action.zonderRegel) {
@@ -184,24 +223,38 @@ export function budgetScannerReducer(
         ? [deriveLearnedRuleVoorGroep(groupedCriterium, corrected, action.bucket, normalizedPotje)]
         : corrected.map((tx) => deriveLearnedRule(tx, action.bucket, normalizedPotje))
       const mergedRules = mergeLearnedRules(state.learnedRules, newRules)
-      const finalTxs = applyLearnedToOnbekend(updatedTxs, mergedRules)
+
+      const finalTxs = groupedCriterium
+        ? applyEditedRuleGrouping(
+            reconcileTransactionsAfterRuleEdit(updatedTxs, state.userRules, mergedRules),
+            newRules[0],
+          )
+        : applyLearnedToOnbekend(updatedTxs, mergedRules)
+
       return { ...state, transacties: finalTxs, learnedRules: mergedRules }
     }
 
     case 'REGEL_PATROON_OVERSCHRIJVEN': {
       let vervangen = false
+      let editedRule: UserRule | null = null
       const update = (regels: UserRule[]) => regels.map((regel) => {
         if (vervangen || !isZelfdeRegel(regel, action.oldRegel)) return regel
         vervangen = true
-        return overschrijfPatronen(regel, action.tegenpartijPatroon, action.omschrijvingPatroon, action.potje)
+        const next = overschrijfPatronen(regel, action.tegenpartijPatroon, action.omschrijvingPatroon, action.potje)
+        editedRule = next
+        return next
       })
 
       if (action.bron === 'user') {
-        return { ...state, userRules: update(state.userRules) }
+        const userRules = update(state.userRules)
+        const reconciled = reconcileTransactionsAfterRuleEdit(state.transacties, userRules, state.learnedRules)
+        const transacties = editedRule ? applyEditedRuleGrouping(reconciled, editedRule) : reconciled
+        return { ...state, userRules, transacties }
       }
 
       const learnedRules = update(state.learnedRules)
-      const transacties = applyLearnedToOnbekend(state.transacties, learnedRules)
+      const reconciled = reconcileTransactionsAfterRuleEdit(state.transacties, state.userRules, learnedRules)
+      const transacties = editedRule ? applyEditedRuleGrouping(reconciled, editedRule) : reconciled
       return { ...state, learnedRules, transacties }
     }
 
