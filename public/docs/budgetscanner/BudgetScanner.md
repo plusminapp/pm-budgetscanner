@@ -1,8 +1,8 @@
-# BudgetScanner
+# De BudgetScanner
 
-## 1. Wat is BudgetScanner?
+## 1. Wat is De BudgetScanner?
 
-[BudgetScanner](#budgetscanner) helpt je om inzicht te krijgen in je [budgetten](#budget). Je maakt in 4 stappen een overzicht van al je betalingen:
+De [de BudgetScanner](budgetscanner) helpt je om inzicht te krijgen in je [budgetten](#budget). Je maakt in 4 stappen een overzicht van al je betalingen:
 
 1. **Download** je betalingen vanuit je bankapp als CAMT.053-bestand (als .zip of .xml).
 2. **Upload** dit bestand in de BudgetScanner.
@@ -11,24 +11,24 @@
 
 Zo ontdek je snel waar je geld naartoe gaat; ideaal als je wilt starten met budgetteren maar nog geen overzicht hebt.
 
-![Startscherm van [BudgetScanner](#budgetscanner) met welkomsttekst](images/h1-welkom.png)
+![Startscherm van [de BudgetScanner](budgetscanner) met welkomsttekst](images/h1-welkom.png)
 
 Als je de(ze) helptekst wil lezen moet je linksboven, naast het logo, op de knop 'Help tonen' klikken. De linkerhelft van het scherm wordt dan gebruikt voor de help tekst terwijl je rechts in de budgetscanner kunt werken. Je kunt in de help dus het deel zoeken waar je mee bezig bent en het rechts dan ook echt doen. Handig toch? En: alle afbeeldingen zijn klikbaar: als je erop klikt worden ze vergroot. Nog een keer klikken en ze zijn weer klein.
 
-![Startscherm van [BudgetScanner](#budgetscanner) met helptekst](images/h1-welkom-help.png)
+![Startscherm van [de BudgetScanner](budgetscanner) met helptekst](images/h1-welkom-help.png)
 
 Bovenaan elke pagina staat een zogenaamde [Stepper](#stepper) met 3 stappen: 1 Welkom, 2 Uploaden en 3 [Toewijzen](#toewijzen). De verschillende stappen worden in de rest van de handleiding uitgebreid toegelicht. Je kunt de [Stepper](#stepper) gebruiken om snel naar een andere stap te gaan door op die stap te klikken. Als je nog geen [betalingen](#betaalgroep) hebt geüpload (zie Stap 2), dan is de stap 3 lichtgrijs. Zodra je stap 2 hebt afgerond, wordt de laatste stap ook donkerder en kun je er wel naar toe.
 
-Als hulpvrager sta jij natuurlijk centraal: jij wilt leren budgetteren en daar kan [BudgetScanner](#budgetscanner) je heel goed bij helpen. Je hoeft niet alles in één keer te begrijpen. Het is heel normaal als dit in het begin redelijk ingewikkeld voelt. Kom je er niet goed uit? Dan kun je altijd ondersteuning vragen aan je [administratiemaatje](#administratiemaatje). Als je geen [administratiemaatje](#administratiemaatje) hebt, kun je contact met ons opnemen: wij kennen veel organisaties die jou kunnen helpen. Het is belangrijk dat je eruit komt, dus zet die stap.
+Als hulpvrager sta jij natuurlijk centraal: jij wilt leren budgetteren en daar kan de [de BudgetScanner](budgetscanner) je heel goed bij helpen. Je hoeft niet alles in één keer te begrijpen. Het is heel normaal als dit in het begin redelijk ingewikkeld voelt. Kom je er niet goed uit? Dan kun je altijd ondersteuning vragen aan je [administratiemaatje](#administratiemaatje). Als je geen [administratiemaatje](#administratiemaatje) hebt, kun je contact met ons opnemen: wij kennen veel organisaties die jou kunnen helpen. Het is belangrijk dat je eruit komt, dus zet die stap.
 
-Het belangrijkste doel van [BudgetScanner](#budgetscanner) is:
+Het belangrijkste doel van [de BudgetScanner](budgetscanner) is:
 
 - op basis van je bestaande [betalingen](#betaalgroep) overzicht krijgen van waar je geld vandaan komt en waar het naartoe gaat
 - daardoor je [budgetten](#budget) kunnen inschatten op basis van echte gegevens, bij voorkeur van een jaar
 
 ## 2. Stap 1: Welkom {#2-stap-1-welkom}
 
-Voordat je start, is het goed om te weten welke soorten bestanden je kunt gebruiken. In [BudgetScanner](#budgetscanner) werk je met [ZIP/XML/CAMT.053](#zipxmlcamt053) en/of [PMB-bestand](#pmb-bestand).
+Voordat je start, is het goed om te weten welke soorten bestanden je kunt gebruiken. In [de BudgetScanner](budgetscanner) werk je met [ZIP/XML/CAMT.053](#zipxmlcamt053) en/of [PMB-bestand](#pmb-bestand).
 
 [ZIP/XML](#zipxmlcamt053)-bestanden komen rechtstreeks van je bank. [ZIP/XML](#zipxmlcamt053), door de bank ook CAMT.053 genoemd, ondersteunen we voor alle banken. Al die bestanden bevatten alleen [betalingen](#betaalgroep). Meestal is dat per bestand van één bankrekening (of spaarrekening of creditcard) tegelijk.
 
@@ -36,7 +36,7 @@ Kies bij voorkeur een periode van een heel jaar. In een jaar komen (bijna) alle 
 
 ![Voorbeeld downloadscherm (ASN bank)](images/h2-asn-camt053.png)
 
-Het [PMB-bestand](#pmb-bestand) is anders. Dat is een bestand dat je eerder vanuit [BudgetScanner](#budgetscanner) hebt opgeslagen. In dit bestand staan alle [betalingen](#betaalgroep) die je toen hebt geüpload (ook als dat van meerdere rekeningen of banken was) en alle [koppelingen](#toewijzen) met [potjes](#potje) die je toen hebt gemaakt. Op die manier kun je doorgaan waar je de vorige keer bent gebleven. Als je de browser sluit terwijl je nog dingen hebt veranderd, waarschuwt de browser. Als je dan *Opslaan als [PMB](#pmb-bestand)* gebruikt, weet je zeker dat er niets verloren gaat. De knop *Opslaan* zit in de stap *[Toewijzen](#toewijzen)*; daar komen we nog op terug.
+Het [PMB-bestand](#pmb-bestand) is anders. Dat is een bestand dat je eerder vanuit [de BudgetScanner](budgetscanner) hebt opgeslagen. In dit bestand staan alle [betalingen](#betaalgroep) die je toen hebt geüpload (ook als dat van meerdere rekeningen of banken was) en alle [koppelingen](#toewijzen) met [potjes](#potje) die je toen hebt gemaakt. Op die manier kun je doorgaan waar je de vorige keer bent gebleven. Als je de browser sluit terwijl je nog dingen hebt veranderd, waarschuwt de browser. Als je dan *[PMB](#pmb-bestand) opslaan* gebruikt, weet je zeker dat er niets verloren gaat. De knop *Opslaan* zit in de stap *[Toewijzen](#toewijzen)*; daar komen we nog op terug.
 
 Gebruik je een [PMB-bestand](#pmb-bestand)? Dan heb je doorgaans geen andere bestanden meer nodig, want daar zitten alle [betalingen](#betaalgroep) al in. Alleen als je nieuwe [betalingen](#betaalgroep), van een andere rekening of van andere maanden, wilt toevoegen, heeft dat nut.
 
@@ -52,7 +52,7 @@ Welke rekeningen wel, en welke niet uploaden is best ingewikkeld. Typisch een on
 
 ### Privacy en veiligheid
 
-Je bestanden blijven op je eigen apparaat. [BudgetScanner](#budgetscanner) verwerkt je gegevens in je browser. Je data wordt niet naar een externe server gestuurd.
+Je bestanden blijven op je eigen apparaat. [de BudgetScanner](budgetscanner) verwerkt je gegevens in je browser. Je data wordt niet naar een externe server gestuurd.
 
 ### Korte samenvatting
 
@@ -70,7 +70,7 @@ Hoe je begint, hangt af van of je hier voor het eerst bent of terugkomt.
 
 **Terugkomen en verdergaan?** Dan upload je het [PMB-bestand](#pmb-bestand) dat je de vorige keer hebt opgeslagen. Daarin zitten al je eerder geüploade [betalingen](#betaalgroep) en alle [koppelingen](#toewijzen) die je al had gemaakt. Je gaat gewoon verder waar je was gebleven — je hoeft dan geen losse bankbestanden meer toe te voegen.
 
-**Nieuwe betalingen toevoegen aan een bestaand overzicht?** Dan upload je tegelijk het [PMB-bestand](#pmb-bestand) én de nieuwe bankbestanden met de extra [betalingen](#betaalgroep). [BudgetScanner](#budgetscanner) voegt de nieuwe [betalingen](#betaalgroep) toe aan wat er al in het [PMB-bestand](#pmb-bestand) zat. Zorg wel dat je geen betalimngen dubbel meeneemt.
+**Nieuwe betalingen toevoegen aan een bestaand overzicht?** Dan upload je tegelijk het [PMB-bestand](#pmb-bestand) én de nieuwe bankbestanden met de extra [betalingen](#betaalgroep). [de BudgetScanner](budgetscanner) voegt de nieuwe [betalingen](#betaalgroep) toe aan wat er al in het [PMB-bestand](#pmb-bestand) zat. Zorg wel dat je geen betalimngen dubbel meeneemt.
 
 ![Bestanden uploaden](images/h3-uploaden-na.png)
 
@@ -78,14 +78,14 @@ Zodra je bestanden zijn ingelezen, zie je direct terugkoppeling onder de uploadz
 
 Zie je een foutmelding? Controleer dan of het bestandstype klopt ([ZIP/CAMT.053](#zipxmlcamt053), [XML/CAMT.053](#zipxmlcamt053) of [PMB](#pmb-bestand)), of het bestand echt van je bank komt en niet handmatig is aangepast, en of je niet per ongeluk een leeg of beschadigd bestand hebt gekozen. Als het daarna nog niet lukt, download het bestand opnieuw bij je bank en probeer het nog een keer. Kom je er dan nog niet uit, vraag hulp aan je [administratiemaatje](#administratiemaatje).
 
-Als alle bestanden goed zijn ingelezen, ga je door naar stap 3: *[Toewijzen](#toewijzen)*. Dat is de kern van [BudgetScanner](#budgetscanner), daar zet je de [betalingen](#betaalgroep) om naar een overzicht dat voor jou klopt.
+Als alle bestanden goed zijn ingelezen, ga je door naar stap 3: *[Toewijzen](#toewijzen)*. Dat is de kern van [de BudgetScanner](budgetscanner), daar zet je de [betalingen](#betaalgroep) om naar een overzicht dat voor jou klopt.
 
 ### Korte samenvatting {#korte-samenvatting-1}
 Begin je voor het eerst, dan upload je bankbestanden ([ZIP/XML](#zipxmlcamt053)). Kom je terug, dan upload je je opgeslagen [PMB](#pmb-bestand). Wil je nieuwe [betalingen](#betaalgroep) toevoegen, dan combineer je beide. Na het uploaden ga je door naar stap 3: *[Toewijzen](#toewijzen)*.
 
 ## 4. Stap 3: Categorieën en potjes toewijzen {#4-stap-3-toewijzen}
 
-Dit is de kern van [BudgetScanner](#budgetscanner). Hier geef je aan wat elke [betaling](#betaalgroep) betekent voor jouw [budget](#budget). Je ziet alle [betalingen](#betaalgroep) in groepen, op basis van de naam van de [tegenpartij](#tegenpartij). Per groep [wijs](#toewijzen) je een [categorie](#categorie) en een [potje](#potje) toe.
+Dit is de kern van [de BudgetScanner](budgetscanner). Hier geef je aan wat elke [betaling](#betaalgroep) betekent voor jouw [budget](#budget). Je ziet alle [betalingen](#betaalgroep) in groepen, op basis van de naam van de [tegenpartij](#tegenpartij). Per groep [wijs](#toewijzen) je een [categorie](#categorie) en een [potje](#potje) toe.
 
 Als je [betalingen](#betaalgroep) aan een [potje](#potje) [koppelt](#toewijzen), leert de app daarvan. Hij maakt dan een regel aan, zodat [betalingen](#betaalgroep) van die [tegenpartij](#tegenpartij) voortaan automatisch aan dat [potje](#potje) worden [toegewezen](#toewijzen).
 
@@ -93,15 +93,15 @@ Als je [betalingen](#betaalgroep) aan een [potje](#potje) [koppelt](#toewijzen),
 
 Elk genummerd blok komt terug, in een eigen paragraaf, hieronder.
 
-### 4.1. Knoppen Toewijzingsregels en Opslaan {#41-knoppen-toewijzingsregels-en-opslaan}
+### 4.1. De knoppen Toewijzingsregels en Opslaan {#41-knoppen-toewijzingsregels-en-opslaan}
 
 Onder de [stepper](#stepper) staan twee belangrijke knoppen: *Toewijzingsregels* en *Opslaan*.
 
 #### Toewijzingsregels
 
-In *Toewijzingsregels* zie je welke herkenningsregels [BudgetScanner](#budgetscanner) heeft gemaakt om [betalingen](#betaalgroep) automatisch [toe te wijzen](#toewijzen) aan een [categorie](#categorie) en een [potje](#potje).
+In *Toewijzingsregels* zie je welke herkenningsregels [de BudgetScanner](budgetscanner) heeft gemaakt om [betalingen](#betaalgroep) automatisch [toe te wijzen](#toewijzen) aan een [categorie](#categorie) en een [potje](#potje).
 
-[BudgetScanner](#budgetscanner) maakt de regels vanzelf aan; daar hoef je niets voor te doen. Je kunt wel zeggen dat je wilt [toewijzen](#toewijzen) [zonder regel](#toewijzen-zonder-regel) omdat een [betaling](#betaalgroep) nooit meer voorkomt. Een regel is dan zinloos. In [Toewijzen zonder regel](#toewijzen-zonder-regel) lees je daar meer over.
+[De BudgetScanner](budgetscanner) maakt de regels vanzelf aan; daar hoef je niets voor te doen. Je kunt wel zeggen dat je wilt [toewijzen](#toewijzen) [zonder regel](#toewijzen-zonder-regel) omdat een [betaling](#betaalgroep) nooit meer voorkomt. Een regel is dan zinloos. In [Toewijzen zonder regel](#toewijzen-zonder-regel) lees je daar meer over.
 
 Elke regel bevat een patroon op de naam van [tegenpartij](#tegenpartij) (en soms ook de omschrijving). Als een nieuwe [betaling](#betaalgroep) daarbij past, krijgt die automatisch de juiste [koppeling](#toewijzen). Dat scheelt veel handmatig werk. In dit scherm kun je regels nalopen en aanpassen.
 
@@ -124,7 +124,7 @@ Tip: in de naam van het [PMB](#pmb-bestand)-bestand zitten de datum en tijd wann
 
 Tip 2: naast de datum en tijd kun je ook meer informatie in de naam stoppen. Bijvoorbeeld: 'leefgeld-gekoppeld'.
 
-### 4.2. Zalmkleurige waarschuwing en voortgangsbalk
+### 4.2. De zalmkleurige waarschuwing en voortgangsbalk
 
 De zalmkleurige waarschuwing trekt je aandacht als er nog iets openstaat: [betalingen](#betaalgroep) zonder [categorie](#categorie) of [betalingen](#betaalgroep) zonder [potje](#potje). De [betalingen](#betaalgroep) zonder [categorie](#categorie) kun je bekijken in het tabblad *[Onbekend](#onbekend)*. De [betalingen](#betaalgroep) zonder [potje](#potje) hebben wel al een [categorie](#categorie), maar nog geen [potje](#potje). Die kun je bekijken in het tabblad *[Categorie zonder potje](#categorie-zonder-potje)* (zie [paragraaf 4.5](#44-filteren-sorteren)).
 
@@ -230,7 +230,7 @@ Als het niet nodig is dat er een regel wordt aangemaakt voor deze [tegenpartij](
 
 Dat geldt niet altijd. Een maandelijkse donatie aan een goed doel noemen we ook een [vaste last](#vaste-lasten). Soms kun je het ook opzeggen zonder gevolgen. Voorbeeld: een abonnement op een tijdschrift.
 
-In de [PlusMin app](#plusmin-app) geven we [vaste lasten](#vaste-lasten) daarom een prioriteit. Hoe belangrijker de [vaste last](#vaste-lasten), hoe zorgvuldiger je moet zorgen dat je hem elke keer betaalt. In het [BudgetScanner](#budgetscanner) is dat nog niet van belang: pas als je de PlusMin methodegaat gebruiken wordt het belangrijk.
+In de [PlusMin app](#plusmin-app) geven we [vaste lasten](#vaste-lasten) daarom een prioriteit. Hoe belangrijker de [vaste last](#vaste-lasten), hoe zorgvuldiger je moet zorgen dat je hem elke keer betaalt. In het [de BudgetScanner](budgetscanner) is dat nog niet van belang: pas als je de PlusMin methodegaat gebruiken wordt het belangrijk.
 
 #### Sparen
 
@@ -238,7 +238,7 @@ In de [PlusMin app](#plusmin-app) geven we [vaste lasten](#vaste-lasten) daarom 
 
 [Sparen](#sparen) kan zowel gaan over het geld IN je spaarpot stoppen als er geld UIT halen. Als je de [betalingen](#betaalgroep) van je betaalrekening hebt geüpload, is [sparen](#sparen) een afschrijving (een [uitgave](#uitgaven), want van betaal- naar spaarrekening). Bij het opnemen van spaargeld is het juist een ontvangst (want van spaar- naar betaalrekening). Als je er vervolgens weer wat mee koopt, is dat weer 'gewoon' een [uitgave](#uitgaven).
 
-Als je meer geld hebt gespaard dan dat je aan spaargeld hebt uitgegeven, is [Sparen](#sparen) in het [dashboard](#budgetscanner) dus negatief. Raar maar waar. En als je het weet, hoef je er niet van te schrikken.
+Als je meer geld hebt gespaard dan dat je aan spaargeld hebt uitgegeven, is [Sparen](#sparen) in het [dashboard](budgetscanner) dus negatief. Raar maar waar. En als je het weet, hoef je er niet van te schrikken.
 
 #### Negeren
 
@@ -280,19 +280,19 @@ In hoofdstuk 4 is uitgebreid uitgelegd hoe het [toewijzen](#toewijzen) werkt. Ma
 
 Het is verstandig om het aantal niet-[gekoppelde](#toewijzen) [betalingen](#betaalgroep) zo snel mogelijk te verminderen. Uiteindelijk zijn ze dan allemaal verwerkt. Volg hiervoor de onderstaande stappen:
 
-1.  Zodra je je [betalingen](#betaalgroep) van de bank hebt gedownload en in [BudgetScanner](#budgetscanner) hebt geüpload, zijn er waarschijnlijk al enkele categoriën herkend. Als je ongeveer twaalf keer hetzelfde bedrag van dezelfde [tegenpartij](#tegenpartij) hebt ontvangen, gaat het waarschijnlijk om [Inkomsten](#inkomsten). Als je twaalf keer hetzelfde bedrag hebt betaald aan dezelfde [tegenpartij](#tegenpartij), zijn dit waarschijnlijk [vaste lasten](#vaste-lasten). Begin met het verwerken van deze groepen: klik op het tabblad [Inkomsten](#inkomsten) en [wijs](#toewijzen) deze toe aan een [potje](#potje). Doe hetzelfde voor de [vaste lasten](#vaste-lasten). Het is raadzaam om elke [vaste last](#vaste-lasten) een eigen [potje](#potje) te geven.
+1.  Zodra je je [betalingen](#betaalgroep) van de bank hebt gedownload en in [de BudgetScanner](budgetscanner) hebt geüpload, zijn er waarschijnlijk al enkele categoriën herkend. Als je ongeveer twaalf keer hetzelfde bedrag van dezelfde [tegenpartij](#tegenpartij) hebt ontvangen, gaat het waarschijnlijk om [Inkomsten](#inkomsten). Als je twaalf keer hetzelfde bedrag hebt betaald aan dezelfde [tegenpartij](#tegenpartij), zijn dit waarschijnlijk [vaste lasten](#vaste-lasten). Begin met het verwerken van deze groepen: klik op het tabblad [Inkomsten](#inkomsten) en [wijs](#toewijzen) deze toe aan een [potje](#potje). Doe hetzelfde voor de [vaste lasten](#vaste-lasten). Het is raadzaam om elke [vaste last](#vaste-lasten) een eigen [potje](#potje) te geven.
 2.  Zoek naar andere [inkomsten](#inkomsten). Filter op [Ontvangsten](#inkomsten). Let op: niet alle ontvangen [betalingen](#betaalgroep) zijn [inkomsten](#inkomsten). Bij een Tikkie of een retourbetaling bij Bol.com ontvang je wel geld, maar dit telt niet als inkomen.
 3.  Zoek de overige [vaste lasten](#vaste-lasten). Filter op het aantal [betalingen](#betaalgroep) en stel dit in op een bereik tussen de 10 en 14. Filter daarna alleen op [Uitgaven](#uitgaven).
 4.  Zoek naar [leefgeld](#leefgeld). [Groepeer](#zoekensamenvoegen) de [betalingen](#betaalgroep) bij winkels waar je vaak komt en waar je [leefgeld](#leefgeld) uitgeeft, zoals de supermarkt of de drogist.
 5.  Zoek naar [sparen](#sparen). [Sparen](#sparen) is een uitzondering: het opnemen van geld en het [sparen](#sparen) ervan hebben bij de bank vaak verschillende namen.
 6.  Zoek naar echt eenmalige [inkomsten](#inkomsten) of [uitgaven](#uitgaven). Deze wil je niet opnemen in je [budget](#budget) en kun je daarom [negeren](#negeren). Pas wel op: een nieuwe wasmachine gaat niet snel kapot, maar is het dit jaar misschien de droger of de koelkast? Bedenk bij een eenmalige [uitgave](#uitgaven) of er soortgelijke situaties kunnen ontstaan en reserveer daarvoor wel geld.
 7.  Als het goed is, zijn er nu veel minder [betalingen](#betaalgroep) die niet zijn [toegewezen](#toewijzen) (zie het tabblad [Onbekend](#onbekend) en de voortgansbalk) en geen [Categorie zonder potje](#categorie-zonder-potje) hebben. Alle andere [betalingen](#betaalgroep) zijn nu aan een [potje](#potje) [toegewezen](#toewijzen). Nu is het tijd om door de lijst te lopen. Hierin zitten vaak veel eenmalige [uitgaven](#uitgaven) waarvoor geen regel nodig is. Met de optie [Toewijzen zonder regel](#toewijzen-zonder-regel) kun je deze snel selecteren en [toewijzen](#toewijzen). Je kunt eventueel alle resterende [betalingen](#betaalgroep) selecteren via de checkbox naast het menu *Bewerking*. Haal vervolgens de uitzonderingen uit de selectie en [wijs](#toewijzen) de rest [zonder regel](#toewijzen-zonder-regel) toe.
-8.  Als alle [betalingen](#betaalgroep) [toegewezen](#toewijzen) zijn, sla je eerst op als [PMB-bestand](#pmb-bestand) om je werk niet te verliezen, en daarna als [PDF-rapport](#pdf-rapport). Kijk in het [PDF-rapport](#pdf-rapport) naar uitschieters en probeer deze te verklaren. Dat je in mei (en misschien ook in december) meer [inkomsten](#inkomsten) had, is logisch. Maar hoe zit het met de uitschieter in het [leefgeld](#leefgeld) in augustus? Ga terug naar [BudgetScanner](#budgetscanner), filter op de betreffende [categorie](#categorie) en de maand, en sorteer op bedrag. Uitschieters zitten vaak in hogere bedragen. Heb je een verklaring gevonden? Beslis dan of je bepaalde [betalingen](#betaalgroep) aan een ander [potje](#potje) wilt toewijzen. Blijf zoeken tot je alles kunt verklaren.
+8.  Als alle [betalingen](#betaalgroep) [toegewezen](#toewijzen) zijn, sla je eerst op als [PMB-bestand](#pmb-bestand) om je werk niet te verliezen, en daarna als [PDF-rapport](#pdf-rapport). Kijk in het [PDF-rapport](#pdf-rapport) naar uitschieters en probeer deze te verklaren. Dat je in mei (en misschien ook in december) meer [inkomsten](#inkomsten) had, is logisch. Maar hoe zit het met de uitschieter in het [leefgeld](#leefgeld) in augustus? Ga terug naar [de BudgetScanner](budgetscanner), filter op de betreffende [categorie](#categorie) en de maand, en sorteer op bedrag. Uitschieters zitten vaak in hogere bedragen. Heb je een verklaring gevonden? Beslis dan of je bepaalde [betalingen](#betaalgroep) aan een ander [potje](#potje) wilt toewijzen. Blijf zoeken tot je alles kunt verklaren.
 9.  Als alle [betalingen](#betaalgroep) [toegewezen](#toewijzen) zijn en het [PDF-rapport](#pdf-rapport) geen geheimen meer bevat, ben je klaar! Gefeliciteerd, je hebt je [budget](#budget) volledig in kaart gebracht!
 
 ### Korte samenvatting {#korte-samenvatting-3}
 
-[Toewijzen](#toewijzen) in de praktijk geeft een aanpak om [betalingen](#betaalgroep) in [BudgetScanner](#budgetscanner) snel aan [potjes](#potje) [toe te wijzen](#toewijzen). Begin met [inkomsten](#inkomsten) en [vaste lasten](#vaste-lasten), omdat deze door [BudgetScanner](#budgetscanner) al zijn herkend. Zoek daarna andere [inkomsten](#inkomsten) en [vaste lasten](#vaste-lasten) via filters, [groepeer](#zoekensamenvoegen) [leefgeld](#leefgeld) bij veelbezochte winkels en [wijs](#toewijzen) [sparen](#sparen) toe. Eenmalige bedragen kun je [negeren](#negeren), maar bedenk wel of er vergelijkbare kosten in de toekomst kunnen ontstaan. Wanneer de meeste [betalingen](#betaalgroep) [toegewezen](#toewijzen) zijn, verwerk je de resterende eenmalige [uitgaven](#uitgaven) via '[Toewijzen zonder regel](#toewijzen-zonder-regel)'. 
+[Toewijzen](#toewijzen) in de praktijk geeft een aanpak om [betalingen](#betaalgroep) in [de BudgetScanner](budgetscanner) snel aan [potjes](#potje) [toe te wijzen](#toewijzen). Begin met [inkomsten](#inkomsten) en [vaste lasten](#vaste-lasten), omdat deze door [de BudgetScanner](budgetscanner) al zijn herkend. Zoek daarna andere [inkomsten](#inkomsten) en [vaste lasten](#vaste-lasten) via filters, [groepeer](#zoekensamenvoegen) [leefgeld](#leefgeld) bij veelbezochte winkels en [wijs](#toewijzen) [sparen](#sparen) toe. Eenmalige bedragen kun je [negeren](#negeren), maar bedenk wel of er vergelijkbare kosten in de toekomst kunnen ontstaan. Wanneer de meeste [betalingen](#betaalgroep) [toegewezen](#toewijzen) zijn, verwerk je de resterende eenmalige [uitgaven](#uitgaven) via '[Toewijzen zonder regel](#toewijzen-zonder-regel)'. 
 
 Sla op als [PMB-bestand](#pmb-bestand) om je werk niet te verliezen en als [PDF-rapport](#pdf-rapport) om uitschieters te analyseren. Zodra alle [betalingen](#betaalgroep) [toegewezen](#toewijzen) zijn en het rapport geen onverklaarde bedragen meer bevat, ben je klaar.
 
@@ -303,7 +303,7 @@ Hieronder vind je de uitleg van de specifieke termen die in deze handleiding wor
 #### Administratiemaatje
 Een professional of vrijwilliger die een hulpvrager begeleidt naar financiële redzaamheid.
 
-#### BudgetScanner
+#### De BudgetScanner
 De applicatie die helpt om inzicht te krijgen in je [budgetten](#budget) door [bankbetalingen](#betaalgroep) te verdelen over potjes en zo overzicht geeft over [inkomsten](#inkomsten) en [uitgaven](#uitgaven).
 
 #### Betaalgroep
@@ -340,10 +340,10 @@ Een tabblad met [betalingen](#betaalgroep) die nog geen [categorie](#categorie) 
 Een rapportbestand met een samenvatting van alle bedragen per [potje](#potje), geschikt om te delen of te bespreken.
 
 #### PlusMin app
-De app van PlusMin waarin je, op basis van potjes, een administratie kunt inrichten op basis van de gegevens uit [BudgetScanner](#budgetscanner).
+De app van PlusMin waarin je, op basis van potjes, een administratie kunt inrichten op basis van de gegevens uit [de BudgetScanner](budgetscanner).
 
 #### PMB-bestand
-Een werkbestand dat je kunt opslaan om later verder te gaan waar je gebleven was. PMB is de afkorting van PlusMin BudgetScanner. De bestanden worden opgeslagen met `.pmb` achter de naam, net zoals `.docx` voor MS Word is en `.png` voor een afbeelding is. Onder water, voor de techneuten, is een `.pmb` bestand een `.json` bestand.
+Een werkbestand dat je kunt opslaan om later verder te gaan waar je gebleven was. PMB is de afkorting van PlusMin De BudgetScanner. De bestanden worden opgeslagen met `.pmb` achter de naam, net zoals `.docx` voor MS Word is en `.png` voor een afbeelding is. Onder water, voor de techneuten, is een `.pmb` bestand een `.json` bestand.
 
 #### Potje
 Een onderverdeling binnen een [categorie](#categorie) waar je geld voor een specifiek doel aan [koppelt](#toewijzen), zoals 'boodschappen' of 'vakantie'.

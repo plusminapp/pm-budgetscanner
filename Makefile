@@ -25,11 +25,11 @@ lcl-pmb: npm-audit lcl-pmb-build
 
 # DEV BUILD
 dev-pmb-build: export VERSION=${PM_DEV_VERSION}
-dev-pmb-build: export PLATFORM=linux/arm64
+dev-pmb-build: export PLATFORM=linux/amd64
 dev-pmb-build: export PORT=3030
 dev-pmb-build: export STAGE=dev
 dev-pmb-build:
-	echo folder: ${PWD} platform: linux/arm64 version: ${VERSION}
+	echo folder: ${PWD} platform: linux/amd64 version: ${VERSION}
 	cp dev/dev.env ${PWD}/dev.env
 	${PWD}/build-pmb-pdf.sh
 	${PWD}/build-docker.sh
@@ -40,19 +40,19 @@ dev-copy:
 dev-pmb: npm-audit dev-pmb-build dev-copy dev-deploy
 
 dev-deploy:
-	cat .env dev/dev.env | ssh box 'cat > ~/io.vliet/pmb/.env'
-	ssh box 'sudo -u ruud bash -lc "cd ~/io.vliet/pmb && ~/io.vliet/pmb/pmb_deploy-dev.sh"'
+	cat .env dev/dev.env | ssh boxmf 'cat > ~/io.vliet/pmb/.env'
+	ssh boxmf 'sudo -u ruud bash -lc "cd ~/io.vliet/pmb && ~/io.vliet/pmb/pmb_deploy-dev.sh"'
 
 # STG BUILD
 stg-pmb-build: export VERSION=${PM_STG_VERSION}
-stg-pmb-build: export PLATFORM=linux/arm64
+stg-pmb-build: export PLATFORM=linux/amd64
 stg-pmb-build: export PORT=3030
 stg-pmb-build: export STAGE=stg
 stg-pmb-build:
-	echo folder: ${PWD} platform: linux/arm64 version: ${VERSION}
+	echo folder: ${PWD} platform: linux/amd64 version: ${VERSION}
 	cp stg/stg.env ${PWD}/stg.env
 	${PWD}/build-pmb-pdf.sh
-	${PWD}/build-docker.sh
+	${PWD}/build-docker.sh 
 
 stg-copy:
 	./docker-cp.sh STG
@@ -60,15 +60,15 @@ stg-copy:
 stg-pmb: npm-audit stg-pmb-build stg-copy stg-deploy
 
 stg-deploy:
-	cat .env stg/stg.env | ssh box 'cat > ~/io.vliet/pmb/.env'
-	ssh box 'sudo -u ruud bash -lc "cd ~/io.vliet/pmb && ~/io.vliet/pmb/pmb_deploy.sh"'
+	cat .env stg/stg.env | ssh boxmf 'cat > ~/io.vliet/pmb/.env'
+	ssh boxmf 'sudo -u ruud bash -lc "cd ~/io.vliet/pmb && ~/io.vliet/pmb/pmb_deploy.sh"'
 
 
 # remote
 .PHONY: stg-remote
 stg-remote:
-	scp stg/* box:~/io.vliet/pmb/
+	scp stg/* boxmf:~/io.vliet/pmb/
 
 .PHONY: dev-remote
 dev-remote:
-	scp dev/* box:~/io.vliet/pmb/
+	scp dev/* boxmf:~/io.vliet/pmb/

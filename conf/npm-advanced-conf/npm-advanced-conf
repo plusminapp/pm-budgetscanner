@@ -1,0 +1,15 @@
+# 1. Headers uitschakelen voor compressie
+proxy_set_header Accept-Encoding "";
+
+# 2. Alleen HTML aanpassen, niet JS/CSS
+sub_filter_once off;
+sub_filter_types text/html;
+sub_filter '%%CSP_NONCE%%' $request_id;
+
+# 3. CSP Header toevoegen (let op: dit mag niet de MIME-type van JS veranderen)
+add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'nonce-$request_id'; style-src 'self' 'nonce-$request_id'; img-src 'self' data:; font-src 'self';" always;
+
+# 4. Standaard headers
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-Proto $scheme;

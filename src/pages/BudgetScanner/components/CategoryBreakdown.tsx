@@ -417,30 +417,16 @@ export function CategoryBreakdown({ transacties, potjes, onCorrectie, onPotjeToe
           </Tabs>
         </div>
         <div className="mt-3 space-y-2">
-          {/* Row 1: checkbox + zoeken (left) | sorteren, in/uit (right) */}
+          {/* Row 1: zoeken (left) | sorteren, in/uit (right) */}
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex w-10 shrink-0 justify-center">
-                {toonSelectieCheckboxes ? (
-                  <Checkbox
-                    size="small"
-                    color="success"
-                    checked={alleZichtbareGeselecteerd}
-                    indeterminate={deelsZichtbaarGeselecteerd}
-                    onChange={(_, checked) => toggleAllesZichtbaar(checked)}
-                    slotProps={{ input: { 'aria-label': 'Alle zichtbare groepen (de)selecteren' } }}
-                  />
-                ) : (
-                  <span className="invisible inline-flex h-10 w-10" aria-hidden="true" />
-                )}
-              </div>
+            <div className="flex min-w-0 flex-1 items-center md:max-w-[50%]">
               <TextField
                 size="small"
                 label="Zoeken"
                 placeholder="Filter"
                 value={tegenpartijFilter}
                 onChange={(e) => setTegenpartijFilter(e.target.value)}
-                sx={{ minWidth: 180, ...COMPACT_FIELD_SX }}
+                sx={{ width: '100%', ...COMPACT_FIELD_SX }}
                 slotProps={{
                   inputLabel: { sx: { color: 'text.disabled', fontSize: '0.8rem' } },
                   input: {
@@ -532,10 +518,23 @@ export function CategoryBreakdown({ transacties, potjes, onCorrectie, onPotjeToe
             </div>
           </div>
 
-          {/* Row 2: eenmalig-knop (left) | min, max transacties (right) */}
+          {/* Row 2: selectie + eenmalig-knop (left) | min, max transacties (right) */}
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="flex min-h-10 flex-wrap items-center gap-2">
-              <span className="inline-flex w-10 shrink-0" aria-hidden="true" />
+              <div className="flex w-10 shrink-0 justify-center">
+                {toonSelectieCheckboxes ? (
+                  <Checkbox
+                    size="small"
+                    color="success"
+                    checked={alleZichtbareGeselecteerd}
+                    indeterminate={deelsZichtbaarGeselecteerd}
+                    onChange={(_, checked) => toggleAllesZichtbaar(checked)}
+                    slotProps={{ input: { 'aria-label': 'Alle zichtbare groepen (de)selecteren' } }}
+                  />
+                ) : (
+                  <span className="invisible inline-flex h-10 w-10" aria-hidden="true" />
+                )}
+              </div>
               <Button
                 size="small"
                 variant="outlined"

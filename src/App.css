@@ -206,6 +206,7 @@
   flex: 1;
   min-width: 0;
   overflow-y: auto;
+  padding-left: 1.5rem;
 }
 
 @media (max-width: 768px) {
@@ -314,7 +315,7 @@
   .app-main {
     height: calc(100vh - 48px);
     height: calc(100dvh - 48px);
-    padding: 8px;
+    padding-left: 0px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }

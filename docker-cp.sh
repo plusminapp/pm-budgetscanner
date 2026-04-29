@@ -17,6 +17,6 @@ fi
 echo version: $VERSION
 
 docker save -o .images/pm-budgetscanner.${VERSION}.tar plusmin/pm-budgetscanner:${VERSION}
-scp .images/pm-budgetscanner.${VERSION}.tar box:~/io.vliet/pm/.images/
-ssh box "bash -lc 'docker load -i ~/io.vliet/pm/.images/pm-budgetscanner.${VERSION}.tar'"
+scp .images/pm-budgetscanner.${VERSION}.tar boxmf:~/io.vliet/pm/.images/
+ssh boxmf "bash -lc 'docker load -i ~/io.vliet/pm/.images/pm-budgetscanner.${VERSION}.tar'"
 

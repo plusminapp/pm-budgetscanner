@@ -5,7 +5,7 @@ set -a
 set +a
 
 LCL_PLATFORM=${LCL_PLATFORM:-linux/amd64}
-PLATFORM=${PLATFORM:-linux/arm64}
+PLATFORM=${PLATFORM:-linux/amd64}
 
 echo pm-budgetscanner version: ${VERSION}
 echo lcl_platform: ${LCL_PLATFORM}

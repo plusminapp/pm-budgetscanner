@@ -6,6 +6,7 @@ import type {
 } from './types'
 import { applyRules } from './categorize/ruleEngine'
 import { matchesRulePattern } from './categorize/patternMatcher'
+import { applyRecurrenceDetection } from './categorize/recurrenceDetector'
 
 export type BudgetScannerAction =
   | { type: 'BESTANDEN_TOEVOEGEN'; bestanden: File[] }
@@ -112,6 +113,18 @@ function mergeLearnedRules(existing: UserRule[], incoming: UserRule[]): UserRule
   const map = new Map(existing.map((r) => [learnedKey(r), r]))
   for (const r of incoming) map.set(learnedKey(r), r)
   return [...map.values()]
+}
+
+function renamePotjeReferences<T extends { bucket: CategorizedTransaction['bucket']; potje?: string | null }>(
+  items: T[],
+  bucket: string,
+  oudeNaam: string | null,
+  nieuweNaam: string,
+): T[] {
+  return items.map((item) => {
+    if (item.bucket !== bucket || (item.potje ?? null) !== oudeNaam) return item
+    return { ...item, potje: nieuweNaam }
+  })
 }
 
 // Fundamental reconciliation for rule edits:
@@ -225,10 +238,10 @@ export function budgetScannerReducer(
       const mergedRules = mergeLearnedRules(state.learnedRules, newRules)
 
       const finalTxs = groupedCriterium
-        ? applyEditedRuleGrouping(
+        ? applyRecurrenceDetection(applyEditedRuleGrouping(
             reconcileTransactionsAfterRuleEdit(updatedTxs, state.userRules, mergedRules),
             newRules[0],
-          )
+          ))
         : applyLearnedToOnbekend(updatedTxs, mergedRules)
 
       return { ...state, transacties: finalTxs, learnedRules: mergedRules }
@@ -248,13 +261,13 @@ export function budgetScannerReducer(
       if (action.bron === 'user') {
         const userRules = update(state.userRules)
         const reconciled = reconcileTransactionsAfterRuleEdit(state.transacties, userRules, state.learnedRules)
-        const transacties = editedRule ? applyEditedRuleGrouping(reconciled, editedRule) : reconciled
+        const transacties = applyRecurrenceDetection(editedRule ? applyEditedRuleGrouping(reconciled, editedRule) : reconciled)
         return { ...state, userRules, transacties }
       }
 
       const learnedRules = update(state.learnedRules)
       const reconciled = reconcileTransactionsAfterRuleEdit(state.transacties, state.userRules, learnedRules)
-      const transacties = editedRule ? applyEditedRuleGrouping(reconciled, editedRule) : reconciled
+      const transacties = applyRecurrenceDetection(editedRule ? applyEditedRuleGrouping(reconciled, editedRule) : reconciled)
       return { ...state, learnedRules, transacties }
     }
 
@@ -285,7 +298,7 @@ export function budgetScannerReducer(
     }
 
     case 'REGELS_IMPORTEREN': {
-      const finalTxs = state.transacties.length > 0
+      const remapped = state.transacties.length > 0
         ? state.transacties.map((tx) => {
             // Preserve manually-corrected transactions untouched
             if (tx.isHandmatig) return tx
@@ -295,6 +308,7 @@ export function budgetScannerReducer(
             return { ...recategorized, isDuplicaat } // preserve duplicate flag
           })
         : state.transacties
+      const finalTxs = applyRecurrenceDetection(remapped)
       return {
         ...state,
         userRules: action.userRules,
@@ -335,20 +349,31 @@ export function budgetScannerReducer(
       return { ...state, potjes: state.potjes.filter((p) => p.id !== action.id) }
 
     case 'POTJE_HERNOEMEN':
-      return {
-        ...state,
-        potjes: state.potjes.map((p) => p.id === action.id ? { ...p, naam: action.naam } : p),
-      }
-    
-      case 'POTJE_HERNOEMEN_BY_BUCKET_EN_NAAM':
+      {
+        const renamedPotje = state.potjes.find((p) => p.id === action.id)
+        if (!renamedPotje) return state
+
         return {
           ...state,
-          potjes: state.potjes.map((p) =>
-            p.bucket === action.bucket && p.naam === action.oudeNaam
-              ? { ...p, naam: action.nieuweNaam }
-              : p
-          ),
+          userRules: renamePotjeReferences(state.userRules, renamedPotje.bucket, renamedPotje.naam, action.naam),
+          learnedRules: renamePotjeReferences(state.learnedRules, renamedPotje.bucket, renamedPotje.naam, action.naam),
+          transacties: renamePotjeReferences(state.transacties, renamedPotje.bucket, renamedPotje.naam, action.naam),
+          potjes: state.potjes.map((p) => p.id === action.id ? { ...p, naam: action.naam } : p),
         }
+      }
+    
+    case 'POTJE_HERNOEMEN_BY_BUCKET_EN_NAAM':
+      return {
+        ...state,
+        userRules: renamePotjeReferences(state.userRules, action.bucket, action.oudeNaam, action.nieuweNaam),
+        learnedRules: renamePotjeReferences(state.learnedRules, action.bucket, action.oudeNaam, action.nieuweNaam),
+        transacties: renamePotjeReferences(state.transacties, action.bucket, action.oudeNaam, action.nieuweNaam),
+        potjes: state.potjes.map((p) =>
+          p.bucket === action.bucket && p.naam === action.oudeNaam
+            ? { ...p, naam: action.nieuweNaam }
+            : p
+        ),
+      }
 
     case 'NAAR_TOEWIJZEN':
       return { ...state, stap: 'TOEWIJZEN' }

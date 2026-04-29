@@ -131,6 +131,52 @@ describe('budgetScannerReducer', () => {
     const next = budgetScannerReducer(state, { type: 'NAAR_UPLOAD' })
     expect(next.stap).toBe('UPLOAD')
   })
+
+  it('CATEGORIE_WIJZIGEN with groepCriterium preserves recurrence-detected buckets on unrelated transactions', () => {
+    // Three monthly Hypotheek debits — recurrence detector marks these as VASTE_LASTEN
+    const makeRecurring = (id: string, datum: string) => makeTx({
+      id,
+      tegenpartij: 'Hypotheek',
+      datum,
+      bucket: 'VASTE_LASTEN',
+      potje: null,
+      isHandmatig: false,
+      regelNaam: 'terugkerend',
+      bedrag: -900,
+    })
+    const txR1 = makeRecurring('tx-r1', '2023-01-01')
+    const txR2 = makeRecurring('tx-r2', '2023-02-01')
+    const txR3 = makeRecurring('tx-r3', '2023-03-01')
+    // An unrelated ONBEKEND transaction the user is about to assign as a group
+    const txGroup = makeTx({
+      id: 'tx-group',
+      tegenpartij: 'ah',
+      bucket: 'ONBEKEND',
+      potje: null,
+      isHandmatig: false,
+      regelNaam: null,
+      bedrag: -50,
+    })
+    const state: BudgetScannerState = {
+      ...initialState,
+      transacties: [txR1, txR2, txR3, txGroup],
+    }
+
+    // Assign tx-group to LEEFGELD as a group (groepCriterium triggers reconcileTransactionsAfterRuleEdit)
+    const next = budgetScannerReducer(state, {
+      type: 'CATEGORIE_WIJZIGEN',
+      transactieIds: ['tx-group'],
+      bucket: 'LEEFGELD',
+      potje: 'Boodschappen',
+      groepCriterium: 'ah',
+    })
+
+    // All three recurrence-detected VASTE_LASTEN transactions must still be VASTE_LASTEN
+    const recurringBuckets = next.transacties
+      .filter((t) => t.id.startsWith('tx-r'))
+      .map((t) => t.bucket)
+    expect(recurringBuckets).toEqual(['VASTE_LASTEN', 'VASTE_LASTEN', 'VASTE_LASTEN'])
+  })
 })
 
 // Helper for learned rule tests
@@ -621,6 +667,28 @@ describe('potje actions', () => {
       })
       expect(next.potjes[0].naam).toBe('Groceries')
       expect(next.potjes[1].naam).toBe('Huur')
+    })
+
+    it('POTJE_HERNOEMEN_BY_BUCKET_EN_NAAM updates references in rules and transactions', () => {
+      const state: BudgetScannerState = {
+        ...initialState,
+        userRules: [{ tegenpartijPatroon: 'ah', richting: 'debit', bucket: 'LEEFGELD', potje: 'Boodschappen' }],
+        learnedRules: [{ tegenpartijPatroon: 'ah bonus', richting: 'debit', bucket: 'LEEFGELD', potje: 'Boodschappen' }],
+        transacties: [makeTx({ bucket: 'LEEFGELD', potje: 'Boodschappen', isHandmatig: true })],
+        potjes: [{ id: 'p-1', naam: 'Boodschappen', bucket: 'LEEFGELD' }],
+      }
+
+      const next = budgetScannerReducer(state, {
+        type: 'POTJE_HERNOEMEN_BY_BUCKET_EN_NAAM',
+        bucket: 'LEEFGELD',
+        oudeNaam: 'Boodschappen',
+        nieuweNaam: 'Groceries',
+      })
+
+      expect(next.potjes[0].naam).toBe('Groceries')
+      expect(next.userRules[0].potje).toBe('Groceries')
+      expect(next.learnedRules[0].potje).toBe('Groceries')
+      expect(next.transacties[0].potje).toBe('Groceries')
     })
 })
 
